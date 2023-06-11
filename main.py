@@ -10,6 +10,7 @@ from gtts import gTTS
 import tkinter as tk
 import os
 
+#Initialize and shift files
 if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards - Depreciated.txt"):
     os.remove("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards - Depreciated.txt")
 if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt"):
@@ -17,8 +18,10 @@ if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt"):
     new_file = os.path.join("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/", "Buy New Cards - Depreciated.txt")
     os.rename(old_file, new_file)
 
+#Read document with sentences
 data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/pol_sentences.tsv", names=('ID', 'Lang', 'Sentence'),
                        sep='\t')
+#Isolate sentences and initalize state
 print(data)
 sentences = data["Sentence"]
 print(sentences)
@@ -26,9 +29,12 @@ index = None
 newCards = 0
 state = "original"
 
+#Initialzie index variable from file
 with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'rb') as file:
     index = pickle.load(file)
+print("Index: " + str(index))
 
+#Initalize google translator
 translator = GoogleTranslator(source='polish', target='english')
 
 original = translation = sepTrans = None
