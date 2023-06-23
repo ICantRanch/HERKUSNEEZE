@@ -19,7 +19,7 @@ if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt"):
     os.rename(old_file, new_file)
 
 #Read document with sentences
-data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/pol_sentences.tsv", names=('ID', 'Lang', 'Sentence'),
+data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/SlimPolaks.tsv", header=0, index_col=0,
                        sep='\t')
 #Isolate sentences and initalize state
 print(data)
