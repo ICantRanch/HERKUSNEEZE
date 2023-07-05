@@ -95,6 +95,16 @@ def advanceState():
         state = "translation"
         showNewTemplate()
 
+def revertOne():
+    global index, state
+
+    index -= 1
+    if state == "original":
+        index -= 1
+    showNewTemplate()
+    showOriginal()
+    state = "original"
+
 def playAudio():
     playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
 
@@ -105,6 +115,9 @@ def handle_keypress(event):
     elif event.char == 'q':
         # Replay audio
         playAudio()
+        return
+    elif event.char == '1':
+        revertOne()
         return
     elif event.char == '2':
         return
