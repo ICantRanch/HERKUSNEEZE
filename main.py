@@ -49,6 +49,11 @@ def showNewTemplate():
     window.update_idletasks()
 
     original = sentences[index]
+    while len(original) > 60:
+        print("Skipped Sentence")
+        index += 1
+        original = sentences[index]
+
     translation = translator.translate(text=original)
 
     translationLabel.insert(0, translation)
