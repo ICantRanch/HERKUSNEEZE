@@ -107,8 +107,7 @@ def revertOne():
     if state == "original":
         index -= 1
     showNewTemplate()
-    showOriginal()
-    state = "original"
+    state = "translation"
 
 def playAudio():
     playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
