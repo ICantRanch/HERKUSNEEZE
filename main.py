@@ -19,7 +19,7 @@ if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt"):
     os.rename(old_file, new_file)
 
 #Read document with sentences
-data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/SlimPolaks.tsv", header=0, index_col=0,
+data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/BaskervillesHorror.tsv", header=0, index_col=0,
                        sep='\t')
 #Isolate sentences and initalize state
 print(data)
@@ -43,20 +43,20 @@ original = translation = sepTrans = None
 def showNewTemplate():
     global index, translator, translation, original, sepTrans, translationLabel, originalLabel, sepTransLabel, window
 
-    translationLabel.delete(0, END)
-    originalLabel.delete(0, END)
-    sepTransLabel.delete(0, END)
+    translationLabel.configure(text = "")
+    originalLabel.configure(text = "")
+    sepTransLabel.configure(text = "")
     window.update_idletasks()
 
     original = sentences[index]
-    while len(original) > 60:
-        print("Skipped Sentence")
-        index += 1
-        original = sentences[index]
 
+    # while len(original) > 60:
+    #     print("Skipped Sentence")
+    #     index += 1
+    #     original = sentences[index]
     translation = translator.translate(text=original)
 
-    translationLabel.insert(0, translation)
+    translationLabel.configure(text = translation)
     window.update_idletasks()
 
     if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3"):
@@ -67,14 +67,17 @@ def showNewTemplate():
     nopunc = re.sub(r'[^\w\s]', '', original)
     nopunc = nopunc.split()
     nopunc = [word for word in nopunc if not word.isnumeric()]
-    transwords = translator.translate_batch(nopunc)
+    try:
+        transwords = translator.translate_batch(nopunc)
+    except:
+        transwords = ['Error in Translation']
     sepTrans = " ".join(transwords)
 
 
 def showOriginal():
     global index, original, originalLabel, window, sepTrans
-    originalLabel.insert(0, original)
-    sepTransLabel.insert(0, sepTrans)
+    originalLabel.configure(text =  original)
+    sepTransLabel.configure(text =  sepTrans)
     window.update_idletasks()
     playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
     index += 1
@@ -137,14 +140,15 @@ window = tk.Tk()
 textFrame = tk.Frame(master=window, width=200, height=100, bg="red")
 textFrame.pack(fill=tk.BOTH, expand=True)
 # translationLabel = tk.Label(master=textFrame, text='it me', font=("Arial", 25))
-translationLabel = tk.Entry(master=textFrame, justify=CENTER, font=("Arial", 25))
-translationLabel.insert(0, "it me")
+translationLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
+#translationLabel.configure(text = "it me")
+translationLabel.configure(text = "it me and I feel as though there must be some kind of way out of here")
 translationLabel.pack(fill=tk.X)
 # originalLabel = tk.Label(master=textFrame, font=("Arial", 25))
-originalLabel = tk.Entry(master=textFrame, justify=CENTER, font=("Arial", 25))
+originalLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
 originalLabel.pack(fill=tk.X)
 # sepTransLabel = tk.Label(master=textFrame, font=("Arial", 25))
-sepTransLabel = tk.Entry(master=textFrame, justify=CENTER, font=("Arial", 25))
+sepTransLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
 sepTransLabel.pack(fill=tk.X)
 textFrame.pack()
 window.geometry("1000x300")
