@@ -79,7 +79,7 @@ def showOriginal():
     originalLabel.configure(text =  original)
     sepTransLabel.configure(text =  sepTrans)
     window.update_idletasks()
-    playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
+    playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3", False)
     index += 1
     with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'wb') as file:
         pickle.dump(index, file)
@@ -142,7 +142,7 @@ textFrame.pack(fill=tk.BOTH, expand=True)
 # translationLabel = tk.Label(master=textFrame, text='it me', font=("Arial", 25))
 translationLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
 #translationLabel.configure(text = "it me")
-translationLabel.configure(text = "it me and I feel as though there must be some kind of way out of here")
+translationLabel.configure(text = "it me")
 translationLabel.pack(fill=tk.X)
 # originalLabel = tk.Label(master=textFrame, font=("Arial", 25))
 originalLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
