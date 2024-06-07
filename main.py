@@ -32,7 +32,7 @@ state = "original"
 #Initialzie index variable from file
 with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'rb') as file:
     index = pickle.load(file)
-print("Index: " + str(index))
+print("Index: " + str(index) + " " + str('%.2f' % ((index/len(sentences))*100)) + "%")
 
 #Initalize google translator
 translator = GoogleTranslator(source='polish', target='english')
