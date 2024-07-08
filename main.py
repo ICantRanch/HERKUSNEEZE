@@ -44,7 +44,7 @@ def showNewTemplate():
     global index, translator, translation, original, sepTrans, translationLabel, originalLabel, sepTransLabel, window
 
     translationLabel.configure(text = "")
-    originalLabel.configure(text = "")
+    originalLabel.configure(text = "Translating...")
     sepTransLabel.configure(text = "")
     window.update_idletasks()
 
@@ -56,6 +56,7 @@ def showNewTemplate():
     #     original = sentences[index]
     translation = translator.translate(text=original)
 
+
     translationLabel.configure(text = translation)
     window.update_idletasks()
 
@@ -63,7 +64,7 @@ def showNewTemplate():
         os.remove("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
     voice = gTTS(text=original, lang='pl', slow=False)
     voice.save("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
-
+    
     nopunc = re.sub(r'[^\w\s]', '', original)
     nopunc = nopunc.split()
     nopunc = [word for word in nopunc if not word.isnumeric()]
@@ -73,6 +74,7 @@ def showNewTemplate():
         transwords = ['Error in Translation']
     sepTrans = " ".join(transwords)
 
+    originalLabel.configure(text="")
 
 def showOriginal():
     global index, original, originalLabel, window, sepTrans
