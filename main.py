@@ -1,6 +1,8 @@
 # This is a sample Python script.
+import collections
 import pickle
 from tkinter import END, CENTER
+import deepl
 
 import pandas
 from deep_translator import GoogleTranslator
@@ -10,19 +12,43 @@ from gtts import gTTS
 import tkinter as tk
 import os
 
+#Load Config
+deeplAuthKey = "4686f7b7-48e1-4c1d-8f63-07e55f927c40:fx"
+
+
+QUEUE_MAXLEN = 5
+
 class atlasInfo:
     def __init__(self):
         self.newCards = None
         self.index = None
-        self.translator = None
+        self.googleTranslator = None
+        self.deeplTranslator = None
         self.translation = None
         self.original = None
         self.sepTrans = None
+        self.transQueue = collections.deque(maxlen=QUEUE_MAXLEN)
+        self.currentTrans = None
         self.translationLabel = None
         self.originalLabel = None
         self.sepTransLabel = None
         self.window = None
         self.state = None
+
+class sentenceTranslation:
+    def __init__(self, UID, index, original, translator):
+        self.UID = UID
+        self.index = index
+        self.original = original
+        #Start thread to translate in background
+        #self.translation = translator(original)
+        #self.sepTrans = translator([original])
+
+def deeplTranslate(translator, original):
+    return translator.translate_text(text=original, target_lang="EN-US")
+
+def googleTranslate(translator, original):
+    return translator.translate(text=original)
 
 atlas1 = atlasInfo()
 
@@ -35,7 +61,7 @@ if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt"):
     os.rename(old_file, new_file)
 
 #Read document with sentences
-data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Kongres futurologiczny.tsv", header=0, index_col=0,
+data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Dan Brown - Kod Leonarda da Vinci (2004).tsv", header=0, index_col=0,
                        sep='\t')
 #Isolate sentences and initalize state
 print(data)
@@ -52,7 +78,9 @@ with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'rb') as file:
 print("Index: " + str(atlas1.index) + " " + str('%.2f' % ((atlas1.index/len(sentences))*100)) + "%")
 
 #Initalize google translator
-atlas1.translator = GoogleTranslator(source='polish', target='english')
+atlas1.googleTranslator = GoogleTranslator(source='polish', target='english')
+#Initalize deepl translator
+atlas1.deeplTranslator = deepl.DeepLClient(deeplAuthKey)
 
 atlas1.window = tk.Tk()
 textFrame = tk.Frame(master=atlas1.window, width=200, height=100, bg="red")
@@ -77,6 +105,19 @@ atlas1.window.title("HERKUSNEEZE")
 def showNewTemplate(atlas):
     #global index, translator, translation, original, sepTrans, translationLabel, originalLabel, sepTransLabel, window
 
+    try:
+        newTrans = atlas.transQueue.popleft()
+        if newTrans.index != atlas.index:
+            raise Exception("Invalid Index")
+        else:
+            atlas.currentTrans = newTrans
+    except Exception as e:
+        print(e)
+        atlas.transQueue.clear()
+        #setup new translation
+
+
+
     atlas.translationLabel.configure(text = "")
     atlas.originalLabel.configure(text = "Translating...")
     atlas.sepTransLabel.configure(text = "")
@@ -88,7 +129,9 @@ def showNewTemplate(atlas):
     #     print("Skipped Sentence")
     #     index += 1
     #     original = sentences[index]
-    atlas.translation = atlas.translator.translate(text=atlas.original)
+    atlas.translation = atlas.googleTranslator.translate(text=atlas.original)
+    print(atlas.translation)
+    print(deeplTranslate(atlas.deeplTranslator, atlas.original))
 
     atlas.translationLabel.configure(text = atlas.translation)
     atlas.window.update_idletasks()
@@ -102,10 +145,10 @@ def showNewTemplate(atlas):
     nopunc = nopunc.split()
     nopunc = [word for word in nopunc if not word.isnumeric()]
     try:
-        transwords = atlas.translator.translate_batch(nopunc)
+        transwords = atlas.googleTranslator.translate_batch(nopunc)
     except:
         transwords = ['Error in Translation']
-    sepTrans = " ".join(transwords)
+    atlas.sepTrans = " ".join(transwords)
 
     atlas.originalLabel.configure(text="")
 
@@ -167,7 +210,7 @@ def handle_keypress(event):
         return
     elif event.char == '4':
         # Add to anki file
-        appendToAnki()
+        appendToAnki(atlas1)
         return
 
 atlas1.window.bind("<Key>", handle_keypress)
