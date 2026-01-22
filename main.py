@@ -3,23 +3,23 @@ import collections
 import pickle
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from tempfile import TemporaryFile, NamedTemporaryFile
 from tkinter import END, CENTER
 import deepl
 
 import pandas
 from deep_translator import GoogleTranslator
 import re
-from playsound import playsound
+from playsound3 import playsound
 from gtts import gTTS
 import tkinter as tk
 import os
 
-#Load Config
+# Load Config
 deeplAuthKey = "4686f7b7-48e1-4c1d-8f63-07e55f927c40:fx"
 
-
 QUEUE_MAXLEN = 5
+
 
 class atlasInfo:
     def __init__(self):
@@ -38,29 +38,34 @@ class atlasInfo:
         self.window = None
         self.state = None
 
+
 class sentenceTranslation:
     def __init__(self, index, original):
-        #self.UID = UID
+        # self.UID = UID
         self.index = index
         self.ready = False
         self.original = original
         self.translation = None
         self.separatedTranslation = None
         self.voice = None
-        #self.sepTrans = translator([original])
+        # self.sepTrans = translator([original])
+
 
 class translatorObj:
     def __init__(self, transType, translator, source_lang, target_lang):
-        self.target_lang = target_lang
-        self.source_lang = source_lang
+        self.targetLang = target_lang
+        self.sourceLang = source_lang
         self.translator = translator
         self.transType = transType
+
 
 def deeplTranslate(translator, original):
     return translator.translate_text(text=original, target_lang="EN-US")
 
+
 def googleTranslate(translator, original):
     return translator.translate(text=original)
+
 
 def translate(transObj, text):
     if transObj.transType == 'google':
@@ -70,7 +75,7 @@ def translate(transObj, text):
             return "Error in Translation"
     elif transObj.transType == 'deepl':
         try:
-            results = transObj.translator.translate_text(text=text, target_lang=transObj.target_lang)
+            results = transObj.translator.translate_text(text=text, target_lang=transObj.targetLang)
             if isinstance(results, list):
                 return " | ".join([result.text for result in results])
             else:
@@ -80,35 +85,52 @@ def translate(transObj, text):
     else:
         raise Exception("Invalid Translator Type")
 
-#Run by thread
+
+def translateVoice(transObj, text):
+    voiceMp3 = NamedTemporaryFile()
+    voice = gTTS(text=text, lang=transObj.sourceLang)
+    voice.write_to_fp(voiceMp3)
+    return voiceMp3
+
+
+def playVoice(voice):
+    playsound(voice.name, block=False)
+
+
 def populateTranslation(atlas, sentenceTrans):
-    print("translating")
     sentenceTrans.translation = translate(atlas.transObj, sentenceTrans.original)
     sentenceTrans.separatedTranslation = translate(atlas.transObj, sentenceTrans.original.split())
-    #Translate words as well
-    #Text-to-Speech
+    sentenceTrans.voice = translateVoice(atlas.transObj, sentenceTrans.original)
     sentenceTrans.ready = True
 
-def addTranslationByIndex(atlas, index):
-    #Dont check index, leave for other method
+
+def addTranslationByIndex(atlas, index, mode):
     newTrans = sentenceTranslation(index, atlas.sentences[index])
-    atlas1.transQueue.append(newTrans)
+    if mode == 'left':
+        print("adding left")
+        atlas1.transQueue.appendleft(newTrans)
+    elif mode == 'right':
+        print("adding right")
+        atlas1.transQueue.append(newTrans)
+    else:
+        raise Exception("Invalid mode")
     x = threading.Thread(target=populateTranslation, args=(atlas, newTrans), daemon=True)
     x.start()
 
+
 def fillQueue(atlas):
     if len(atlas.transQueue) == 0:
-        addTranslationByIndex(atlas, atlas.index)
+        addTranslationByIndex(atlas, atlas.index, 'right')
     while len(atlas.transQueue) < atlas.transQueue.maxlen:
         lastElement = atlas.transQueue.pop()
         lastIndex = lastElement.index
         atlas.transQueue.append(lastElement)
-        addTranslationByIndex(atlas, lastIndex+1)
+        addTranslationByIndex(atlas, lastIndex + 1, 'right')
 
 
 atlas1 = atlasInfo()
 
-#Initialize and shift files
+# Initialize and shift files
 if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards - Depreciated.txt"):
     os.remove("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards - Depreciated.txt")
 if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt"):
@@ -116,10 +138,11 @@ if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt"):
     new_file = os.path.join("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/", "Buy New Cards - Depreciated.txt")
     os.rename(old_file, new_file)
 
-#Read document with sentences
-data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Dan Brown - Kod Leonarda da Vinci (2004).tsv", header=0, index_col=0,
+# Read document with sentences
+data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Dan Brown - Kod Leonarda da Vinci (2004).tsv",
+                       header=0, index_col=0,
                        sep='\t')
-#Isolate sentences and initalize state
+# Isolate sentences and initalize state
 print(data)
 sentences = data["Sentence"]
 print(sentences)
@@ -127,27 +150,27 @@ atlas1.sentences = sentences
 atlas1.index = None
 atlas1.newCards = 0
 atlas1.state = "original"
-#original = translation = sepTrans = None
+# original = translation = sepTrans = None
 
-#Initialzie index variable from file
+# Initialize index variable from file
 with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'rb') as file:
-    atlas1.index = pickle.load(file)
-print("Index: " + str(atlas1.index) + " " + str('%.2f' % ((atlas1.index/len(sentences))*100)) + "%")
+    atlas1.index = pickle.load(file) - 2
+print("Index: " + str(atlas1.index) + " " + str('%.2f' % ((atlas1.index / len(sentences)) * 100)) + "%")
 
-#Initalize google translator
+# Initialize google translator
 atlas1.googleTranslator = GoogleTranslator(source='polish', target='english')
-#Initalize deepl translator
+# Initialize deepl translator
 atlas1.deeplTranslator = deepl.DeepLClient(deeplAuthKey)
 
-atlas1.transObj = translatorObj("deepl", atlas1.deeplTranslator, "PL", "EN-US")
+atlas1.transObj = translatorObj("deepl", atlas1.deeplTranslator, "pl", "EN-US")
 
 atlas1.window = tk.Tk()
 textFrame = tk.Frame(master=atlas1.window, width=200, height=100, bg="red")
 textFrame.pack(fill=tk.BOTH, expand=True)
 # translationLabel = tk.Label(master=textFrame, text='it me', font=("Arial", 25))
 atlas1.translationLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
-#translationLabel.configure(text = "it me")
-atlas1.translationLabel.configure(text = "it me")
+# translationLabel.configure(text = "it me")
+atlas1.translationLabel.configure(text="it me")
 atlas1.translationLabel.pack(fill=tk.X)
 # originalLabel = tk.Label(master=textFrame, font=("Arial", 25))
 atlas1.originalLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
@@ -160,82 +183,84 @@ atlas1.window.geometry("1000x450")
 atlas1.window.title("HERKUSNEEZE")
 
 
-#atlas1 = atlasInfo(index, translator, translation, original, sepTrans, translationLabel, originalLabel, sepTransLabel, window, newCards)
+# atlas1 = atlasInfo(index, translator, translation, original, sepTrans, translationLabel, originalLabel, sepTransLabel, window, newCards)
 def showNewTemplate(atlas):
-    #global index, translator, translation, original, sepTrans, translationLabel, originalLabel, sepTransLabel, window
+    # global index, translator, translation, original, sepTrans, translationLabel, originalLabel, sepTransLabel, window
 
-    try:
-        newTrans = atlas.transQueue.popleft()
-        if newTrans.index != atlas.index:
-            raise Exception("Invalid Index")
-        else:
-            atlas.currentTrans = newTrans
-    except Exception as e:
-        print(e)
-        atlas.transQueue.clear()
-        #setup new translation
+    for i in range(2):
+        try:
+            fillQueue(atlas1)
+            newTrans = atlas.transQueue.popleft()
+            if newTrans.index != atlas.index:
+                raise Exception("Invalid Index")
+            else:
+                atlas.currentTrans = newTrans
+                break
+        except Exception as e:
+            print(e)
+            atlas.transQueue.clear()
 
-    fillQueue(atlas1)
-    first = atlas1.transQueue.pop()
-    while not first.ready:
+    while not atlas1.currentTrans.ready:
         print("snoozin")
         time.sleep(1)
-    print(atlas1.transQueue)
 
-    atlas.translationLabel.configure(text = "")
-    atlas.originalLabel.configure(text = "Translating...")
-    atlas.sepTransLabel.configure(text = "")
+    atlas.translationLabel.configure(text="")
+    atlas.originalLabel.configure(text="Translating...")
+    atlas.sepTransLabel.configure(text="")
     atlas.window.update_idletasks()
 
-    atlas.original = atlas1.sentences[atlas.index]
+    #atlas.original = atlas1.sentences[atlas.index]
 
     # while len(original) > 60:
     #     print("Skipped Sentence")
     #     index += 1
     #     original = sentences[index]
-    atlas.translation = atlas.googleTranslator.translate(text=atlas.original)
-    print(atlas.translation)
-    print(deeplTranslate(atlas.deeplTranslator, atlas.original))
+    #atlas.translation = atlas.googleTranslator.translate(text=atlas.original)
+    #print(atlas.translation)
+    #print(deeplTranslate(atlas.deeplTranslator, atlas.original))
 
-    atlas.translationLabel.configure(text = atlas.translation)
+    print("Showing: %s" % (atlas.index))
+    atlas.translationLabel.configure(text=atlas.currentTrans.translation)
     atlas.window.update_idletasks()
 
-    if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3"):
-        os.remove("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
-    voice = gTTS(text=atlas.original, lang='pl', slow=False)
-    voice.save("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
-    
-    nopunc = re.sub(r'[^\w\s]', '', atlas.original)
-    nopunc = nopunc.split()
-    nopunc = [word for word in nopunc if not word.isnumeric()]
-    try:
-        transwords = atlas.googleTranslator.translate_batch(nopunc)
-    except:
-        transwords = ['Error in Translation']
-    atlas.sepTrans = " ".join(transwords)
+    # if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3"):
+    #     os.remove("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
+    # voice = gTTS(text=atlas.original, lang='pl', slow=False)
+    # voice.save("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
+
+    # nopunc = re.sub(r'[^\w\s]', '', atlas.original)
+    # nopunc = nopunc.split()
+    # nopunc = [word for word in nopunc if not word.isnumeric()]
+    # try:
+    #     transwords = atlas.googleTranslator.translate_batch(nopunc)
+    # except:
+    #     transwords = ['Error in Translation']
+    # atlas.sepTrans = " ".join(transwords)
 
     atlas.originalLabel.configure(text="")
 
+
 def showOriginal(atlas):
-    #global index, original, originalLabel, window, sepTrans
-    atlas.originalLabel.configure(text=atlas.original)
-    atlas.sepTransLabel.configure(text=atlas.sepTrans)
+    # global index, original, originalLabel, window, sepTrans
+    atlas.originalLabel.configure(text=atlas.currentTrans.original)
+    atlas.sepTransLabel.configure(text=atlas.currentTrans.separatedTranslation)
     atlas.window.update_idletasks()
-    playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3", False)
-    atlas.index += 1
-    with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'wb') as file:
-        pickle.dump(atlas.index, file)
+    playVoice(atlas.currentTrans.voice)
+    #playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3", False)
+    # atlas.index += 1
+    # with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'wb') as file:
+    #     pickle.dump(atlas.index, file)
 
 
 def appendToAnki(atlas):
-    #global original, translation, newCards
+    # global original, translation, newCards
 
     with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt", 'a', encoding='utf-8') as deck:
-        #Add quotations around sentences to avoid anki reading semicolons
-        newCard = "\"%s;%s\"\n"%(atlas.translation, atlas.original)
+        # Add quotations around sentences to avoid anki reading semicolons
+        newCard = "\"%s\";\"%s\"\n" % (atlas.currentTrans.translation, atlas.currentTrans.original)
         atlas.newCards += 1
         deck.write(newCard)
-    print("Added to deck, %d new cards" %atlas.newCards)
+    print("Added to deck, %d new cards" % atlas.newCards)
 
 
 def advanceState(atlas):
@@ -244,19 +269,28 @@ def advanceState(atlas):
         showOriginal(atlas)
     else:
         atlas.state = "translation"
+        atlas.index += 1
+        with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'wb') as indexfile:
+            pickle.dump(atlas.index, indexfile)
         showNewTemplate(atlas)
 
+
 def revertOne(atlas):
-    #global index, state
+    # global index, state
 
     atlas.index -= 1
-    if atlas.state == "original":
-        atlas.index -= 1
-    showNewTemplate(atlas)
+    # if atlas.state == "original":
+    #     atlas.index -= 1
+    atlas.transQueue.appendleft(atlas.currentTrans)
+    addTranslationByIndex(atlas, atlas.index, 'left')
     atlas.state = "translation"
+    showNewTemplate(atlas)
 
-def playAudio():
-    playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
+
+def playAudio(atlas):
+    # playsound("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/voice.mp3")
+    playVoice(atlas.currentTrans.voice)
+
 
 def handle_keypress(event):
     if event.char == ' ':
@@ -264,7 +298,7 @@ def handle_keypress(event):
         return
     elif event.char == 'q':
         # Replay audio
-        playAudio()
+        playAudio(atlas1)
         return
     elif event.char == '1':
         revertOne(atlas1)
@@ -277,6 +311,7 @@ def handle_keypress(event):
         # Add to anki file
         appendToAnki(atlas1)
         return
+
 
 atlas1.window.bind("<Key>", handle_keypress)
 atlas1.window.mainloop()
