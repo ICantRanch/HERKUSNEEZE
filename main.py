@@ -1,6 +1,9 @@
 # This is a sample Python script.
 import collections
 import pickle
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from tkinter import END, CENTER
 import deepl
 
@@ -22,8 +25,8 @@ class atlasInfo:
     def __init__(self):
         self.newCards = None
         self.index = None
-        self.googleTranslator = None
-        self.deeplTranslator = None
+        self.sentences = None
+        self.transObj = None
         self.translation = None
         self.original = None
         self.sepTrans = None
@@ -36,19 +39,72 @@ class atlasInfo:
         self.state = None
 
 class sentenceTranslation:
-    def __init__(self, UID, index, original, translator):
-        self.UID = UID
+    def __init__(self, index, original):
+        #self.UID = UID
         self.index = index
+        self.ready = False
         self.original = original
-        #Start thread to translate in background
-        #self.translation = translator(original)
+        self.translation = None
+        self.separatedTranslation = None
+        self.voice = None
         #self.sepTrans = translator([original])
+
+class translatorObj:
+    def __init__(self, transType, translator, source_lang, target_lang):
+        self.target_lang = target_lang
+        self.source_lang = source_lang
+        self.translator = translator
+        self.transType = transType
 
 def deeplTranslate(translator, original):
     return translator.translate_text(text=original, target_lang="EN-US")
 
 def googleTranslate(translator, original):
     return translator.translate(text=original)
+
+def translate(transObj, text):
+    if transObj.transType == 'google':
+        try:
+            return transObj.translator.translate(text=text)
+        except:
+            return "Error in Translation"
+    elif transObj.transType == 'deepl':
+        try:
+            results = transObj.translator.translate_text(text=text, target_lang=transObj.target_lang)
+            if isinstance(results, list):
+                return " | ".join([result.text for result in results])
+            else:
+                return results.text
+        except:
+            return "Error in Translation"
+    else:
+        raise Exception("Invalid Translator Type")
+
+#Run by thread
+def populateTranslation(atlas, sentenceTrans):
+    print("translating")
+    sentenceTrans.translation = translate(atlas.transObj, sentenceTrans.original)
+    sentenceTrans.separatedTranslation = translate(atlas.transObj, sentenceTrans.original.split())
+    #Translate words as well
+    #Text-to-Speech
+    sentenceTrans.ready = True
+
+def addTranslationByIndex(atlas, index):
+    #Dont check index, leave for other method
+    newTrans = sentenceTranslation(index, atlas.sentences[index])
+    atlas1.transQueue.append(newTrans)
+    x = threading.Thread(target=populateTranslation, args=(atlas, newTrans), daemon=True)
+    x.start()
+
+def fillQueue(atlas):
+    if len(atlas.transQueue) == 0:
+        addTranslationByIndex(atlas, atlas.index)
+    while len(atlas.transQueue) < atlas.transQueue.maxlen:
+        lastElement = atlas.transQueue.pop()
+        lastIndex = lastElement.index
+        atlas.transQueue.append(lastElement)
+        addTranslationByIndex(atlas, lastIndex+1)
+
 
 atlas1 = atlasInfo()
 
@@ -67,6 +123,7 @@ data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Dan Brown - Kod
 print(data)
 sentences = data["Sentence"]
 print(sentences)
+atlas1.sentences = sentences
 atlas1.index = None
 atlas1.newCards = 0
 atlas1.state = "original"
@@ -81,6 +138,8 @@ print("Index: " + str(atlas1.index) + " " + str('%.2f' % ((atlas1.index/len(sent
 atlas1.googleTranslator = GoogleTranslator(source='polish', target='english')
 #Initalize deepl translator
 atlas1.deeplTranslator = deepl.DeepLClient(deeplAuthKey)
+
+atlas1.transObj = translatorObj("deepl", atlas1.deeplTranslator, "PL", "EN-US")
 
 atlas1.window = tk.Tk()
 textFrame = tk.Frame(master=atlas1.window, width=200, height=100, bg="red")
@@ -116,14 +175,19 @@ def showNewTemplate(atlas):
         atlas.transQueue.clear()
         #setup new translation
 
-
+    fillQueue(atlas1)
+    first = atlas1.transQueue.pop()
+    while not first.ready:
+        print("snoozin")
+        time.sleep(1)
+    print(atlas1.transQueue)
 
     atlas.translationLabel.configure(text = "")
     atlas.originalLabel.configure(text = "Translating...")
     atlas.sepTransLabel.configure(text = "")
     atlas.window.update_idletasks()
 
-    atlas.original = sentences[atlas.index]
+    atlas.original = atlas1.sentences[atlas.index]
 
     # while len(original) > 60:
     #     print("Skipped Sentence")
@@ -167,7 +231,8 @@ def appendToAnki(atlas):
     #global original, translation, newCards
 
     with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt", 'a', encoding='utf-8') as deck:
-        newCard = "%s;%s\n"%(atlas.translation, atlas.original)
+        #Add quotations around sentences to avoid anki reading semicolons
+        newCard = "\"%s;%s\"\n"%(atlas.translation, atlas.original)
         atlas.newCards += 1
         deck.write(newCard)
     print("Added to deck, %d new cards" %atlas.newCards)
