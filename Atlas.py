@@ -23,7 +23,6 @@ class atlasInfo:
         self.translationLabel = None
         self.originalLabel = None
         self.sepTransLabel = None
-        self.window = None
         self.state = None
 
     class sentenceTranslation:
