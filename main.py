@@ -198,12 +198,16 @@ def initializeAtlas():
         newAtlas.sentences = list(data["Sentence"])
 
         window.bind("<Key>", handle_keypress)
+
+        translationLabel.configure(text="Welcome to Atlas")
+        originalLabel.configure(text="Advance to continue")
+
         return newAtlas
     except Exception as e:
         print(e)
         translationLabel.configure(text="No text selected")
         originalLabel.configure(text="Texts can be added and selected in the configuration menu")
-
+        sepTransLabel.configure(text='')
         pass
 
 
@@ -215,10 +219,10 @@ window = tk.Tk()
 textFrame = tk.Frame(master=window, width=200, height=100, bg="red")
 textFrame.pack(fill=tk.BOTH, expand=True)
 translationLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
-translationLabel.configure(text="Welcome to Atlas")
+# translationLabel.configure(text="Welcome to Atlas")
 translationLabel.pack(fill=tk.X)
 originalLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
-originalLabel.configure(text="Advance to continue")
+# originalLabel.configure(text="Advance to continue")
 originalLabel.pack(fill=tk.X)
 sepTransLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
 sepTransLabel.pack(fill=tk.X)
@@ -272,11 +276,11 @@ def showOriginal(atlas):
 
 
 def appendToAnki(atlas):
-    with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt", 'a', encoding='utf-8') as deck:
-        # Add quotations around sentences to avoid anki reading semicolons
+    with open("Output/Saved Cards - Last Session.txt", 'a', encoding='utf-8') as lastsession, open("Output/Saved Cards - Total.txt", 'a', encoding='utf-8') as total:
         newCard = "\"%s\";\"%s\"\n" % (atlas.currentTrans.translation, atlas.currentTrans.original)
         atlas.newCards += 1
-        deck.write(newCard)
+        lastsession.write(newCard)
+        total.write(newCard)
     print("Added to deck, %d new cards" % atlas.newCards)
 
 
