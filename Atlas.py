@@ -5,7 +5,10 @@ from tempfile import NamedTemporaryFile
 
 from playsound3 import playsound
 from gtts import gTTS
-
+import deepl
+from deep_translator import GoogleTranslator
+from googletrans import Translator as googletransTranslator
+from google_trans_new import google_translator
 
 
 # Load Config
@@ -14,7 +17,8 @@ class atlasInfo:
     QUEUE_MAXLEN = 5
 
     def __init__(self):
-        self.newCards = None
+        self.text = None
+        self.newCards = 0
         self.index = None
         self.sentences = None
         self.transObj = None
@@ -23,7 +27,7 @@ class atlasInfo:
         self.translationLabel = None
         self.originalLabel = None
         self.sepTransLabel = None
-        self.state = None
+        self.state = 'Original'
 
     class sentenceTranslation:
         def __init__(self, index, original):
@@ -39,33 +43,57 @@ class atlasInfo:
             playsound(self.voice.name, block=False)
 
     class translatorObj:
-        def __init__(self, transType, translator, source_lang, target_lang):
-            self.targetLang = target_lang
-            self.sourceLang = source_lang
+        def __init__(self, transType, translator, source_langs, target_langs):
+            self.targetLangs = target_langs
+            self.sourceLangs = source_langs
             self.translator = translator
             self.transType = transType
 
-    def translate(self, text):
+    def initializeTranslator(self, sources, targets, isdeepl, key):
+        try:
+            if isdeepl:
+                deeplTranslator = deepl.DeepLClient(key)
+                deeplTranslator.get_usage()
+                self.transObj = self.translatorObj('deepl', deeplTranslator, sources, targets)
+            else:
+                raise Exception
+        except:
+            googleTranslator = GoogleTranslator(source='auto', target=targets['google'])
+            self.transObj = self.translatorObj('google', googleTranslator, sources, targets)
+
+    def translate(self, texts):
         if self.transObj.transType == 'google':
             try:
-                return self.transObj.translator.translate(text=text)
-            except:
+                # Don't judge this too much, this cludge is because the translation library
+                # doesn't like multiple threads using the same translator :/
+                googleTranslator = GoogleTranslator(source='auto', target=self.transObj.targetLangs['google'])
+
+                if isinstance(texts, list):
+                    results = self.transObj.translator.translate_batch(texts)
+                    output = " | ".join([result for result in results if isinstance(result, str)])
+                    return output
+                else:
+                    result = googleTranslator.translate(texts)
+                    return result
+            except Exception as e:
+                print('Translation Exception' + str(e))
                 return "Error in Translation"
         elif self.transObj.transType == 'deepl':
             try:
-                results = self.transObj.translator.translate_text(text=text, target_lang=self.transObj.targetLang)
+                results = self.transObj.translator.translate_text(text=texts, target_lang=self.transObj.targetLangs['deepl'])
                 if isinstance(results, list):
                     return " | ".join([result.text for result in results])
                 else:
                     return results.text
-            except:
+            except Exception as e:
+                print(e)
                 return "Error in Translation"
         else:
             raise Exception("Invalid Translator Type")
 
     def translateVoice(self, text):
         voiceMp3 = NamedTemporaryFile()
-        gTTS(text=text, lang=self.transObj.sourceLang).write_to_fp(voiceMp3)
+        gTTS(text=text, lang=self.transObj.sourceLangs['google']).write_to_fp(voiceMp3)
         return voiceMp3
 
     def populateTranslation(self, sentenceTrans):
@@ -88,6 +116,7 @@ class atlasInfo:
         x.start()
 
     def fillQueue(self):
+
         if len(self.transQueue) == 0:
             self.addTranslationByIndex(self.index, 'right')
         while len(self.transQueue) < self.transQueue.maxlen:

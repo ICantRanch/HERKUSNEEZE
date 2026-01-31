@@ -8,6 +8,7 @@ import pandas
 from deep_translator import GoogleTranslator
 from googletrans import Translator as googletransTranslator
 import tkinter as tk
+from tkinter import ttk
 import os
 import configparser
 import uuid
@@ -15,22 +16,20 @@ import uuid
 from Atlas import atlasInfo
 from AuditMeParas import parseTxt
 
-# Load Config
-config = configparser.ConfigParser()
-config['DEFAULT'] = {'test':'youbetcha'}
-with open('example.ini', 'w') as configfile:
-    config.write(configfile)
 
 deeplAuthKey = "4686f7b7-48e1-4c1d-8f63-07e55f927c40:fx"
 
 def addNewText():
     filepath = tk.filedialog.askopenfilename()
+    if not os.path.exists(filepath):
+        tk.messagebox.showwarning("New Text Selection", "Invalid File Path")
+        return
     initialFilePath = 'Converted Texts/'
     os.makedirs(initialFilePath, exist_ok=True)
     fileName = os.path.splitext(os.path.basename(filepath))[0]
     parsedFilePath = "%s%s.tsv" % (initialFilePath, fileName)
     parseTxt(filepath, parsedFilePath)
-    parsedData = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Dan Brown - Kod Leonarda da Vinci (2004).tsv",
+    parsedData = pandas.read_csv(parsedFilePath,
                            header=0, index_col=0,
                            sep='\t')
     sampleSentence = parsedData["Sentence"][10]
@@ -40,7 +39,7 @@ def addNewText():
 
     detectedLang = detectTrans.detect(sampleSentence).lang
 
-    with open("googleTable.json", "r") as file:
+    with open("language Tables/googleTable.json", "r") as file:
         googles = json.load(file)
 
     textInfo = {fileName: {"ID": uuid.uuid1().hex, "index": 0, "lang": googles[detectedLang]}}
@@ -50,6 +49,15 @@ def addNewText():
         jsonData.update(textInfo)
         file.seek(0)
         json.dump(jsonData, file, indent=4)
+
+def newConfig():
+
+    config = configparser.ConfigParser()
+    config.read('default.ini')
+    with open('atlasConfig.ini', 'w') as configfile:
+        config.write(configfile)
+    editConfig()
+
 def editConfig():
 
     #Config:
@@ -58,76 +66,173 @@ def editConfig():
     #deepl api key
     #Current text
 
+    def saveConfig():
+        config['Atlas']['nativeLang'] = languageSelector.get().lower()
+
+        if deeplApiEntry.get() != '':
+            validation = validateTranslator(deeplApiEntry.get())
+            if validation:
+                config['Atlas']['deeplapikey'] = deeplApiEntry.get()
+            else:
+                tk.messagebox.showwarning("DeepL Validation", "The inputted DeepL api key is invalid")
+                config['Atlas']['deeplapikey'] = ''
+            config['Atlas']['deepl'] = str(validation)
+
+        config['Atlas']['currentText'] = textSelector.get()
+
+        with open('atlasConfig.ini', 'w') as configfile:
+            config.write(configfile)
+        popup.destroy()
+        atlas1['atlas'] = initializeAtlas()
+
+    def addTextHelper():
+        addNewText()
+        with open("atlasTextData.json", "r") as file:
+            availableTexts = list(json.load(file).keys())
+        textSelector['values'] = availableTexts
+
     popup = tk.Toplevel(window)
+    popup.geometry('350x350')
+    popup.transient(window)
 
+    config = configparser.ConfigParser()
+    config.read('atlasConfig.ini')
 
-atlas1 = atlasInfo()
+    with open("Language Tables/combinedTable.json", "r") as file:
+        combinedTable = json.load(file)
 
-# Initialize and shift files
-if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards - Depreciated.txt"):
-    os.remove("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards - Depreciated.txt")
-if os.path.isfile("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Buy New Cards.txt"):
-    old_file = os.path.join("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/", "Buy New Cards.txt")
-    new_file = os.path.join("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/", "Buy New Cards - Depreciated.txt")
-    os.rename(old_file, new_file)
+    availableLanguages = [language.capitalize() for language in list(combinedTable.keys())]
 
-# Read document with sentences
-data = pandas.read_csv("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Dan Brown - Kod Leonarda da Vinci (2004).tsv",
+    languageSelector = tk.ttk.Combobox(popup, values=availableLanguages)
+    currentLang = config['Atlas']['nativeLang'].capitalize()
+    if currentLang in availableLanguages:
+        languageSelector.set(currentLang)
+    languageSelector.pack(padx=5, pady=5)
+
+    deeplApiEntry = tk.ttk.Entry(popup)
+    deeplApiEntry.insert(0, config['Atlas']['deeplapikey'])
+    deeplApiEntry.pack()
+
+    addTextButton = tk.ttk.Button(popup, text="Add New Text", command=addTextHelper)
+    addTextButton.pack()
+
+    with open("atlasTextData.json", "r") as file:
+        availableTexts = list(json.load(file).keys())
+
+    textSelector = tk.ttk.Combobox(popup, values=availableTexts)
+    if config['Atlas']['currentText'] in availableTexts:
+        textSelector.set(config['Atlas']['currentText'])
+    textSelector.pack(padx=5, pady=5)
+
+    saveButton = tk.ttk.Button(popup, text="Save Config", command=saveConfig)
+    saveButton.pack()
+
+    window.wait_window(popup)
+
+def validateTranslator(apikey):
+    try:
+        deepl.DeepLClient(apikey).get_usage()
+        return True
+    except:
+        return False
+
+def loadConfig():
+    for i in range(2):
+        try:
+            # If config doesn't exist create new config
+            open('atlasConfig.ini', 'r')
+            config = configparser.ConfigParser()
+            config.read('atlasConfig.ini')
+            return config
+        except:
+            newConfig()
+def handle_keypress(event):
+    atlas2 = atlas1['atlas']
+    if event.char == ' ':
+        advanceState(atlas2)
+        return
+    elif event.char == 'q':
+        # Replay audio
+        playAudio(atlas2)
+        return
+    elif event.char == '1':
+        revertOne(atlas2)
+        return
+    elif event.char == '2':
+        return
+    elif event.char == '3':
+        return
+    elif event.char == '4':
+        # Add to anki file
+        appendToAnki(atlas2)
+        return
+def initializeAtlas():
+
+    try:
+        # Load Config
+        config = loadConfig()
+
+        with open("Output/Saved Cards - Last Session.txt", 'w') as file:
+            file.close()
+        newAtlas = atlasInfo()
+
+        #Load Text Data
+        with open("atlasTextData.json", "r") as file:
+            textData = json.load(file)
+        currentText = (config['Atlas']['currentText'], textData[config['Atlas']['currentText']])
+
+        newAtlas.text = currentText[0]
+        newAtlas.index = currentText[1]['index']
+
+        #Load Language Table
+        with open("Language Tables/combinedTable.json", "r") as file:
+            combinedTable = json.load(file)
+
+        newAtlas.initializeTranslator(combinedTable[currentText[1]['lang']], combinedTable[config['Atlas']['nativelang']], config['Atlas'].getboolean('deepl'), config['Atlas']['deeplapikey'])
+
+        filepath = 'Converted Texts/%s.tsv' % config['Atlas']['currentText']
+        print(filepath)
+        data = pandas.read_csv(filepath,
                        header=0, index_col=0,
                        sep='\t')
-# Isolate sentences and initalize state
-print(data)
-sentences = data["Sentence"]
-print(sentences)
-atlas1.sentences = sentences
-atlas1.index = None
-atlas1.newCards = 0
-atlas1.state = "original"
+        newAtlas.sentences = list(data["Sentence"])
 
-# Initialize index variable from file
-with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'rb') as file:
-    atlas1.index = pickle.load(file) - 1
+        window.bind("<Key>", handle_keypress)
+        return newAtlas
+    except Exception as e:
+        print(e)
+        translationLabel.configure(text="No text selected")
+        originalLabel.configure(text="Texts can be added and selected in the configuration menu")
 
-# with open("atlasTextData.json", "r+") as file:
-#     jsonData = json.load(file)
-#     atlas1.index = jsonData[textName]["index"]
+        pass
 
-print("Index: " + str(atlas1.index) + " " + str('%.2f' % ((atlas1.index / len(sentences)) * 100)) + "%")
+
+# atlas1 = atlasInfo()
 
 detectTrans = googletransTranslator(service_urls=['translate.google.com'])
-# Initialize google translator
-atlas1.googleTranslator = GoogleTranslator(source='auto', target='english')
-# Initialize deepl translator
-atlas1.deeplTranslator = deepl.DeepLClient(deeplAuthKey)
-
-
-atlas1.transObj = atlasInfo.translatorObj("deepl", atlas1.deeplTranslator, "pl", "EN-US")
 
 window = tk.Tk()
 textFrame = tk.Frame(master=window, width=200, height=100, bg="red")
 textFrame.pack(fill=tk.BOTH, expand=True)
-# translationLabel = tk.Label(master=textFrame, text='it me', font=("Arial", 25))
-atlas1.translationLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
-# translationLabel.configure(text = "it me")
-atlas1.translationLabel.configure(text="Welcome to Atlas")
-atlas1.translationLabel.pack(fill=tk.X)
-# originalLabel = tk.Label(master=textFrame, font=("Arial", 25))
-atlas1.originalLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
-atlas1.originalLabel.configure(text="Advance to continue")
-atlas1.originalLabel.pack(fill=tk.X)
-# sepTransLabel = tk.Label(master=textFrame, font=("Arial", 25))
-atlas1.sepTransLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
-atlas1.sepTransLabel.pack(fill=tk.X)
+translationLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
+translationLabel.configure(text="Welcome to Atlas")
+translationLabel.pack(fill=tk.X)
+originalLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
+originalLabel.configure(text="Advance to continue")
+originalLabel.pack(fill=tk.X)
+sepTransLabel = tk.Message(master=textFrame, justify=CENTER, font=("Arial", 25), width=1000)
+sepTransLabel.pack(fill=tk.X)
 textFrame.pack()
 
 Menu = tk.Menu(textFrame)
 Menu.add_command(label='Add Text', command=addNewText)
+Menu.add_command(label='Edit Config', command=editConfig)
 window.config(menu=Menu)
+
+atlas1 = {'atlas': initializeAtlas()}
 
 window.geometry("1000x450")
 window.title("HERKUSNEEZE")
-
-
 def showNewTemplate(atlas):
     for i in range(2):
         try:
@@ -142,26 +247,26 @@ def showNewTemplate(atlas):
             print(e)
             atlas.transQueue.clear()
 
-    atlas.translationLabel.configure(text="")
-    atlas.sepTransLabel.configure(text="")
+    translationLabel.configure(text="")
+    sepTransLabel.configure(text="")
 
     while not atlas.currentTrans.ready:
         print("snoozin")
-        atlas.originalLabel.configure(text="Translating...")
+        originalLabel.configure(text="Translating...")
         window.update_idletasks()
         time.sleep(1)
 
-    atlas.originalLabel.configure(text="")
+    originalLabel.configure(text="")
     window.update_idletasks()
 
     print("Showing: %s" % atlas.index)
-    atlas.translationLabel.configure(text=atlas.currentTrans.translation)
+    translationLabel.configure(text=atlas.currentTrans.translation)
     window.update_idletasks()
 
 
 def showOriginal(atlas):
-    atlas.originalLabel.configure(text=atlas.currentTrans.original)
-    atlas.sepTransLabel.configure(text=atlas.currentTrans.separatedTranslation)
+    originalLabel.configure(text=atlas.currentTrans.original)
+    sepTransLabel.configure(text=atlas.currentTrans.separatedTranslation)
     window.update_idletasks()
     atlas.currentTrans.playVoice()
 
@@ -175,6 +280,13 @@ def appendToAnki(atlas):
     print("Added to deck, %d new cards" % atlas.newCards)
 
 
+def updateIndex(atlas):
+    with open("atlasTextData.json", "r+") as file:
+        textData = json.load(file)
+        textData[atlas.text]['index'] = atlas.index
+        file.seek(0)
+        json.dump(textData, file, indent=4)
+
 def advanceState(atlas):
     if atlas.state == "translation":
         atlas.state = "original"
@@ -182,8 +294,7 @@ def advanceState(atlas):
     else:
         atlas.state = "translation"
         atlas.index += 1
-        with open("C:/Users/Hubert/Desktop/sftp/HERKUSNEEZE/Vars-HKSZ", 'wb') as indexfile:
-            pickle.dump(atlas.index, indexfile)
+        updateIndex(atlas)
         showNewTemplate(atlas)
 
 
@@ -199,26 +310,6 @@ def playAudio(atlas):
     atlas.currentTrans.playVoice()
 
 
-def handle_keypress(event):
-    if event.char == ' ':
-        advanceState(atlas1)
-        return
-    elif event.char == 'q':
-        # Replay audio
-        playAudio(atlas1)
-        return
-    elif event.char == '1':
-        revertOne(atlas1)
-        return
-    elif event.char == '2':
-        return
-    elif event.char == '3':
-        return
-    elif event.char == '4':
-        # Add to anki file
-        appendToAnki(atlas1)
-        return
-
-
-window.bind("<Key>", handle_keypress)
 window.mainloop()
+
+
