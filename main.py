@@ -185,6 +185,19 @@ def loadConfig():
             return config
         except:
             newConfig()
+def gotoIndex(atlas):
+    newIndex = tk.simpledialog.askinteger('Go to index', 'What index would you like to go to?')
+    try:
+        if 0 <= newIndex <= len(atlas.sentences):
+            atlas.index = newIndex
+        else:
+            raise Exception
+    except:
+        tk.messagebox.showwarning('Go to index', 'Invalid index')
+        return
+    updateIndex(atlas)
+    atlas.state = "translation"
+    showNewTemplate(atlas)
 def handle_keypress(input):
     atlas2 = atlas1['atlas']
 
@@ -212,6 +225,10 @@ def handle_keypress(input):
     elif character == '4':
         # Add to anki file
         appendToAnki(atlas2)
+        return
+    elif character == '5':
+        # Add to anki file
+        gotoIndex(atlas2)
         return
 def initializeAtlas():
 
@@ -249,6 +266,7 @@ def initializeAtlas():
         translationLabel.configure(text="Welcome to Atlas")
         originalLabel.configure(text="Advance to continue")
         sepTransLabel.configure(text='')
+        textNameLabel.configure(text=newAtlas.text)
 
         return newAtlas
     except Exception as e:
@@ -269,20 +287,31 @@ textFrame = tk.Frame(master=window, width=1000, height=100)
 tk.Grid.columnconfigure(textFrame, 0, weight=1)
 textFrame.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
+textInfoFrame = tk.ttk.Labelframe(textFrame, text='Text Info')
+textInfoFrame.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
+tk.Grid.columnconfigure(textInfoFrame, 0, weight=1)
+textNameLabel = tk.Message(master=textInfoFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
+textNameLabel.grid(row=0, column=1, sticky='NSEW', padx=10, pady=10)
+textIndexLabel = tk.Message(master=textInfoFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
+textIndexLabel.grid(row=0, column=2, sticky='NSEW', padx=10, pady=10)
+tk.Grid.columnconfigure(textInfoFrame, 0, weight=1)
+tk.Grid.columnconfigure(textInfoFrame, 2, weight=1)
+
+
 translationFrame = tk.ttk.Labelframe(textFrame, text='Translation')
-translationFrame.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
+translationFrame.grid(row=1, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(translationFrame, 0, weight=1)
 translationLabel = tk.Message(master=translationFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
 translationLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 originalFrame = tk.ttk.Labelframe(textFrame, text='Original')
-originalFrame.grid(row=1, column=0, sticky='NSEW', padx=10, pady=10)
+originalFrame.grid(row=2, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(originalFrame, 0, weight=1)
 originalLabel = tk.Message(master=originalFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
 originalLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 sepTransFrame = tk.ttk.Labelframe(textFrame, text='Individual Translations')
-sepTransFrame.grid(row=2, column=0, sticky='NSEW', padx=10, pady=10)
+sepTransFrame.grid(row=3, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(sepTransFrame, 0, weight=1)
 sepTransLabel = tk.Message(master=sepTransFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
 sepTransLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
@@ -293,8 +322,9 @@ tk.Grid.columnconfigure(controlFrame, 0, weight=1)
 tk.Grid.columnconfigure(controlFrame, 1, weight=1)
 tk.Grid.columnconfigure(controlFrame, 2, weight=1)
 tk.Grid.columnconfigure(controlFrame, 3, weight=1)
+tk.Grid.columnconfigure(controlFrame, 4, weight=1)
 
-controlFrame.grid(row=3, column=0, sticky='NSEW', padx=10, pady=10)
+controlFrame.grid(row=4, column=0, sticky='NSEW', padx=10, pady=10)
 
 revertButton = tk.ttk.Button(controlFrame, text="Revert [1]", command=lambda: handle_keypress('1'))
 revertButton.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
@@ -304,13 +334,15 @@ advanceButton = tk.ttk.Button(controlFrame, text="Advance [space]", command=lamb
 advanceButton.grid(row=0, column=2, sticky='NSEW', padx=10, pady=10)
 ankiButton = tk.ttk.Button(controlFrame, text="Save to Output [4]", command=lambda: handle_keypress('4'))
 ankiButton.grid(row=0, column=3, sticky='NSEW', padx=10, pady=10)
+gotoButton = tk.ttk.Button(controlFrame, text="Go to index", command=lambda: handle_keypress('5'))
+gotoButton.grid(row=0, column=4, sticky='NSEW', padx=10, pady=10)
 
 
 
 textFrame.pack()
 
 Menu = tk.Menu(textFrame)
-Menu.add_command(label='Add Text', command=addNewText)
+# Menu.add_command(label='Add Text', command=addNewText)
 Menu.add_command(label='Edit Config', command=editConfig)
 window.config(menu=Menu)
 
@@ -346,6 +378,8 @@ def showNewTemplate(atlas):
 
     print("Showing: %s" % atlas.index)
     translationLabel.configure(text=atlas.currentTrans.translation)
+    indexpercent = (atlas.index/len(atlas.sentences)*100)
+    textIndexLabel.configure(text='Index: %s %.2f%%' % (atlas.index, indexpercent))
     window.update_idletasks()
 
 
@@ -371,6 +405,7 @@ def updateIndex(atlas):
         textData[atlas.text]['index'] = atlas.index
         file.seek(0)
         json.dump(textData, file, indent=4)
+
 
 def advanceState(atlas):
     if atlas.state == "translation":
