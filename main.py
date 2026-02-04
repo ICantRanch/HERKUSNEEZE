@@ -210,26 +210,18 @@ def handle_keypress(input):
             pass
     if character == ' ':
         advanceState(atlas2)
-        return
     elif character == 'q':
         # Replay audio
         playAudio(atlas2)
-        return
     elif character == '1':
         revertOne(atlas2)
-        return
-    elif character == '2':
-        return
-    elif character == '3':
-        return
     elif character == '4':
         # Add to anki file
         appendToAnki(atlas2)
-        return
     elif character == '5':
-        # Add to anki file
+        # Go to a user inputed index
         gotoIndex(atlas2)
-        return
+    advanceButton.focus_set()
 def initializeAtlas():
 
     try:
@@ -403,6 +395,7 @@ def updateIndex(atlas):
     with open("atlasTextData.json", "r+") as file:
         textData = json.load(file)
         textData[atlas.text]['index'] = atlas.index
+        file.truncate(0)
         file.seek(0)
         json.dump(textData, file, indent=4)
 
