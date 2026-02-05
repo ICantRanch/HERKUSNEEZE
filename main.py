@@ -10,6 +10,7 @@ from googletrans import Translator as googletransTranslator
 from langdetect import detect
 import tkinter as tk
 from tkinter import ttk
+from tkinter import scrolledtext
 import os
 import configparser
 import uuid
@@ -198,6 +199,16 @@ def gotoIndex(atlas):
     updateIndex(atlas)
     atlas.state = "translation"
     showNewTemplate(atlas)
+
+def setFontSize(newsize):
+    mainfont.config(size=newsize)
+    config = configparser.ConfigParser()
+    config.read('atlasConfig.ini')
+    config['Atlas']['textsize'] = newsize
+    with open('atlasConfig.ini', 'w') as configfile:
+        config.write(configfile)
+
+
 def handle_keypress(input):
     atlas2 = atlas1['atlas']
 
@@ -221,7 +232,6 @@ def handle_keypress(input):
     elif character == '5':
         # Go to a user inputed index
         gotoIndex(atlas2)
-    advanceButton.focus_set()
 def initializeAtlas():
 
     try:
@@ -255,6 +265,9 @@ def initializeAtlas():
 
         window.bind("<Key>", handle_keypress)
 
+        fontsizevar.set(config['Atlas']['textsize'])
+        setFontSize(config['Atlas']['textsize'])
+
         translationLabel.configure(text="Welcome to Atlas")
         originalLabel.configure(text="Advance to continue")
         sepTransLabel.configure(text='')
@@ -272,49 +285,60 @@ def initializeAtlas():
 # atlas1 = atlasInfo()
 
 window = tk.Tk()
+window.geometry("1000x850")
 
+mainfont = tk.font.Font(family='Arial', size=25)
 
-textFrame = tk.Frame(master=window, width=1000, height=100)
-# textFrame.pack(fill=tk.BOTH, expand=True)
+tk.Grid.columnconfigure(window, 0, weight=1)
+tk.Grid.rowconfigure(window, 0, weight=1)
+
+textFrame = tk.Frame(master=window)
 tk.Grid.columnconfigure(textFrame, 0, weight=1)
+# tk.Grid.rowconfigure(textFrame, 0, weight=1)
 textFrame.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
+
 
 textInfoFrame = tk.ttk.Labelframe(textFrame, text='Text Info')
 textInfoFrame.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
-tk.Grid.columnconfigure(textInfoFrame, 0, weight=1)
-textNameLabel = tk.Message(master=textInfoFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
+# textSizeFrame = tk.Frame(textFrame)
+fontsizevar = tk.IntVar(value=25)
+textSizeChanger = tk.ttk.Spinbox(textInfoFrame, from_=1, to=50, textvariable=fontsizevar, command=lambda: setFontSize(textSizeChanger.get()))
+
+textSizeChanger.grid(row=0, column=0, padx=10, pady=10)
+textNameLabel = tk.Message(master=textInfoFrame, anchor=CENTER, justify=CENTER, font=mainfont, width=950)
 textNameLabel.grid(row=0, column=1, sticky='NSEW', padx=10, pady=10)
-textIndexLabel = tk.Message(master=textInfoFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
+textIndexLabel = tk.Message(master=textInfoFrame, anchor=CENTER, justify=CENTER, font=mainfont, width=950)
 textIndexLabel.grid(row=0, column=2, sticky='NSEW', padx=10, pady=10)
-tk.Grid.columnconfigure(textInfoFrame, 0, weight=1)
-tk.Grid.columnconfigure(textInfoFrame, 2, weight=1)
+tk.Grid.columnconfigure(textInfoFrame, (0, 2), weight=1, uniform=1)
 
 
 translationFrame = tk.ttk.Labelframe(textFrame, text='Translation')
 translationFrame.grid(row=1, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(translationFrame, 0, weight=1)
-translationLabel = tk.Message(master=translationFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
+print(window.winfo_width())
+translationLabel = tk.Label(master=translationFrame, anchor=CENTER, justify=CENTER, font=mainfont, height=4, wraplength=930)
 translationLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 originalFrame = tk.ttk.Labelframe(textFrame, text='Original')
 originalFrame.grid(row=2, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(originalFrame, 0, weight=1)
-originalLabel = tk.Message(master=originalFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
+originalLabel = tk.Label(master=originalFrame, anchor=CENTER, justify=CENTER, font=mainfont, height=4, wraplength=930)
 originalLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 sepTransFrame = tk.ttk.Labelframe(textFrame, text='Individual Translations')
 sepTransFrame.grid(row=3, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(sepTransFrame, 0, weight=1)
-sepTransLabel = tk.Message(master=sepTransFrame, anchor=CENTER, justify=CENTER, font=("Arial", 25), width=950)
+sepTransLabel = tk.Label(master=sepTransFrame, anchor=CENTER, justify=CENTER, font=mainfont, height=4, wraplength=930)
 sepTransLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 controlFrame = tk.Frame(textFrame)
 tk.Grid.rowconfigure(controlFrame, 0, weight=1)
-tk.Grid.columnconfigure(controlFrame, 0, weight=1)
-tk.Grid.columnconfigure(controlFrame, 1, weight=1)
-tk.Grid.columnconfigure(controlFrame, 2, weight=1)
-tk.Grid.columnconfigure(controlFrame, 3, weight=1)
-tk.Grid.columnconfigure(controlFrame, 4, weight=1)
+# tk.Grid.columnconfigure(controlFrame, 0, weight=1)
+# tk.Grid.columnconfigure(controlFrame, 1, weight=1)
+# tk.Grid.columnconfigure(controlFrame, 2, weight=1)
+# tk.Grid.columnconfigure(controlFrame, 3, weight=1)
+# tk.Grid.columnconfigure(controlFrame, 4, weight=1)
+controlFrame.columnconfigure([0,1,2,3,4], weight=1, uniform=1)
 
 controlFrame.grid(row=4, column=0, sticky='NSEW', padx=10, pady=10)
 
@@ -329,10 +353,6 @@ ankiButton.grid(row=0, column=3, sticky='NSEW', padx=10, pady=10)
 gotoButton = tk.ttk.Button(controlFrame, text="Go to index", command=lambda: handle_keypress('5'))
 gotoButton.grid(row=0, column=4, sticky='NSEW', padx=10, pady=10)
 
-
-
-textFrame.pack()
-
 Menu = tk.Menu(textFrame)
 # Menu.add_command(label='Add Text', command=addNewText)
 Menu.add_command(label='Edit Config', command=editConfig)
@@ -340,7 +360,7 @@ window.config(menu=Menu)
 
 atlas1 = {'atlas': initializeAtlas()}
 
-window.geometry("1000x450")
+
 window.title("Atlas")
 def showNewTemplate(atlas):
     for i in range(2):
@@ -371,7 +391,7 @@ def showNewTemplate(atlas):
     print("Showing: %s" % atlas.index)
     translationLabel.configure(text=atlas.currentTrans.translation)
     indexpercent = (atlas.index/len(atlas.sentences)*100)
-    textIndexLabel.configure(text='Index: %s %.2f%%' % (atlas.index, indexpercent))
+    textIndexLabel.configure(text='Index: %s | %.2f%%' % (atlas.index, indexpercent))
     window.update_idletasks()
 
 
