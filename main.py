@@ -1,16 +1,12 @@
 import json
-import pickle
 import time
 from tkinter import CENTER
 import deepl
 
 import pandas
-from deep_translator import GoogleTranslator
-from googletrans import Translator as googletransTranslator
 from langdetect import detect
 import tkinter as tk
 from tkinter import ttk
-from tkinter import scrolledtext
 import os
 import configparser
 import uuid
@@ -18,8 +14,8 @@ import uuid
 from Atlas import atlasInfo
 from AuditMeParas import parseTxt
 
-
 deeplAuthKey = "4686f7b7-48e1-4c1d-8f63-07e55f927c40:fx"
+
 
 def addNewText():
     filepath = tk.filedialog.askopenfilename()
@@ -32,15 +28,17 @@ def addNewText():
     parsedFilePath = "%s%s.tsv" % (initialFilePath, fileName)
     parseTxt(filepath, parsedFilePath)
     parsedData = pandas.read_csv(parsedFilePath,
-                           header=0, index_col=0,
-                           sep='\t')
+                                 header=0, index_col=0,
+                                 sep='\t')
 
     with open("language Tables/googleTable.json", "r") as file:
         googles = json.load(file)
 
     sampleSentence = parsedData["Sentence"][10]
     detectedLang = detect(sampleSentence)
-    result = tk.messagebox.askquestion(title="Confirmation", message="Does the following sentence look correct?\n\n%s\n\nDetect Language: %s" % (sampleSentence, googles[detectedLang].capitalize()))
+    result = tk.messagebox.askquestion(title="Confirmation",
+                                       message="Does the following sentence look correct?\n\n%s\n\nDetect Language: %s" % (
+                                       sampleSentence, googles[detectedLang].capitalize()))
     if result != 'yes':
         print("non")
         return
@@ -48,30 +46,26 @@ def addNewText():
     textInfo = {fileName: {"ID": uuid.uuid1().hex, "index": 0, "lang": googles[detectedLang]}}
 
     with open("atlasTextData.json", "a+") as file:
+        file.seek(0)
         try:
             jsonData = json.load(file)
-        except:
+        except Exception as e:
+            print(e)
             jsonData = {}
         jsonData.update(textInfo)
-        file.seek(0)
+        file.truncate(0)
         json.dump(jsonData, file, indent=4)
 
-def newConfig():
 
+def newConfig():
     config = configparser.ConfigParser()
     config.read('default.ini')
     with open('atlasConfig.ini', 'w') as configfile:
         config.write(configfile)
     editConfig()
 
+
 def editConfig():
-
-    #Config:
-    #Native Lang
-    #Google or deepl
-    #deepl api key
-    #Current text
-
     def saveConfig():
 
         if languageSelector.get() in availableLanguages:
@@ -80,7 +74,8 @@ def editConfig():
         if deeplApiEntry.get() != '':
             validation = validateTranslator(deeplApiEntry.get())
             if validation and deeplApiEntry.get() != config['Atlas']['deeplapikey']:
-                tk.messagebox.showinfo("DeepL Validation", "The inputted DeepL api key is valid, DeepL translation has been enabled")
+                tk.messagebox.showinfo("DeepL Validation",
+                                       "The inputted DeepL api key is valid, DeepL translation has been enabled")
                 config['Atlas']['deeplapikey'] = deeplApiEntry.get()
             elif not validation:
                 tk.messagebox.showwarning("DeepL Validation", "The inputted DeepL api key is invalid")
@@ -104,7 +99,7 @@ def editConfig():
 
     popup = tk.Toplevel(window)
     popup.title('Atlas Config')
-    popup.geometry('500x550+%s+%s' % (round(window.winfo_x()+(window.winfo_width()/4)), window.winfo_y()+10))
+    popup.geometry('500x550+%s+%s' % (round(window.winfo_x() + (window.winfo_width() / 4)), window.winfo_y() + 10))
     popup.transient(window)
 
     config = configparser.ConfigParser()
@@ -130,13 +125,13 @@ def editConfig():
     languageSelector.grid(row=0, column=0, sticky='EW', ipadx=10, ipady=10, padx=10, pady=10)
     languageFrame.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
 
-
     deeplFrame = tk.ttk.Labelframe(popup, text='DeepL Configuration (Optional)')
     deeplFrame.grid(row=1, column=0, sticky='EW', padx=10, pady=10)
     tk.Grid.columnconfigure(deeplFrame, 0, weight=1)
     tk.Grid.rowconfigure(deeplFrame, 0, weight=1)
 
-    deepllabel = tk.Message(master=deeplFrame, anchor=CENTER, justify=CENTER, width= 300, text='DeepL can offer better translations but an API key is required. A free API is available but requires a DeepL account and credit card information.\n If no valid api key is available, Google Translate will be used instead')
+    deepllabel = tk.Message(master=deeplFrame, anchor=CENTER, justify=CENTER, width=300,
+                            text='DeepL can offer better translations but an API key is required. A free API is available but requires a DeepL account and credit card information.\n If no valid api key is available, Google Translate will be used instead.')
     deepllabel.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
     deeplApiEntry = tk.ttk.Entry(deeplFrame)
     deeplApiEntry.insert(0, config['Atlas']['deeplapikey'])
@@ -147,7 +142,8 @@ def editConfig():
     tk.Grid.columnconfigure(textSelectionFrame, 0, weight=1)
     tk.Grid.rowconfigure(textSelectionFrame, 0, weight=1)
 
-    addTextLabel = tk.Message(textSelectionFrame, anchor=CENTER, justify=CENTER, width= 300, text='A Standard .txt file can be converted for use with this app. Any number of texts can be stored and switched between. The index for each text is unique, you can switch freely between texts without losing your spot.')
+    addTextLabel = tk.Message(textSelectionFrame, anchor=CENTER, justify=CENTER, width=300,
+                              text='A Standard .txt file can be converted for use with this app. Any number of texts can be stored and switched between. The index for each text is unique, you can switch freely between texts without losing your spot.')
     addTextLabel.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
     addTextButton = tk.ttk.Button(textSelectionFrame, text="Add New Text", command=addTextHelper)
     addTextButton.grid(row=2, column=0, sticky='EW', padx=10, pady=10)
@@ -169,12 +165,14 @@ def editConfig():
 
     window.wait_window(popup)
 
+
 def validateTranslator(apikey):
     try:
         deepl.DeepLClient(apikey).get_usage()
         return True
     except:
         return False
+
 
 def loadConfig():
     for i in range(2):
@@ -186,6 +184,8 @@ def loadConfig():
             return config
         except:
             newConfig()
+
+
 def gotoIndex(atlas):
     newIndex = tk.simpledialog.askinteger('Go to index', 'What index would you like to go to?')
     try:
@@ -200,6 +200,7 @@ def gotoIndex(atlas):
     atlas.state = "translation"
     showNewTemplate(atlas)
 
+
 def setFontSize(newsize):
     mainfont.config(size=newsize)
     config = configparser.ConfigParser()
@@ -207,6 +208,13 @@ def setFontSize(newsize):
     config['Atlas']['textsize'] = newsize
     with open('atlasConfig.ini', 'w') as configfile:
         config.write(configfile)
+
+
+def resizeLabels(event):
+    if event.widget == window:
+        labels = [translationLabel, originalLabel, sepTransLabel]
+        for label in labels:
+            label.configure(wraplength=round(event.width * 0.9))
 
 
 def handle_keypress(input):
@@ -232,8 +240,9 @@ def handle_keypress(input):
     elif character == '5':
         # Go to a user inputed index
         gotoIndex(atlas2)
-def initializeAtlas():
 
+
+def initializeAtlas():
     try:
         # Load Config
         config = loadConfig()
@@ -242,25 +251,27 @@ def initializeAtlas():
             file.close()
         newAtlas = atlasInfo()
 
-        #Load Text Data
+        # Load Text Data
         with open("atlasTextData.json", "r") as file:
             textData = json.load(file)
         currentText = (config['Atlas']['currentText'], textData[config['Atlas']['currentText']])
 
         newAtlas.text = currentText[0]
-        newAtlas.index = max(currentText[1]['index']-1, -1)
+        newAtlas.index = max(currentText[1]['index'] - 1, -1)
 
-        #Load Language Table
+        # Load Language Table
         with open("Language Tables/combinedTable.json", "r") as file:
             combinedTable = json.load(file)
 
-        newAtlas.initializeTranslator(combinedTable[currentText[1]['lang']], combinedTable[config['Atlas']['nativelang']], config['Atlas'].getboolean('deepl'), config['Atlas']['deeplapikey'])
+        newAtlas.initializeTranslator(combinedTable[currentText[1]['lang']],
+                                      combinedTable[config['Atlas']['nativelang']], config['Atlas'].getboolean('deepl'),
+                                      config['Atlas']['deeplapikey'])
 
         filepath = 'Converted Texts/%s.tsv' % config['Atlas']['currentText']
         print(filepath)
         data = pandas.read_csv(filepath,
-                       header=0, index_col=0,
-                       sep='\t')
+                               header=0, index_col=0,
+                               sep='\t')
         newAtlas.sentences = list(data["Sentence"])
 
         window.bind("<Key>", handle_keypress)
@@ -272,6 +283,8 @@ def initializeAtlas():
         originalLabel.configure(text="Advance to continue")
         sepTransLabel.configure(text='')
         textNameLabel.configure(text=newAtlas.text)
+        indexpercent = (newAtlas.index / len(newAtlas.sentences) * 100)
+        textIndexLabel.configure(text='Index: %s | %.2f%%' % (newAtlas.index, indexpercent))
 
         return newAtlas
     except Exception as e:
@@ -296,27 +309,41 @@ textFrame = tk.Frame(master=window)
 tk.Grid.columnconfigure(textFrame, 0, weight=1)
 # tk.Grid.rowconfigure(textFrame, 0, weight=1)
 textFrame.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
-
+textFrame.rowconfigure((1, 2, 3), weight=1, uniform=1)
 
 textInfoFrame = tk.ttk.Labelframe(textFrame, text='Text Info')
 textInfoFrame.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
-# textSizeFrame = tk.Frame(textFrame)
-fontsizevar = tk.IntVar(value=25)
-textSizeChanger = tk.ttk.Spinbox(textInfoFrame, from_=1, to=50, textvariable=fontsizevar, command=lambda: setFontSize(textSizeChanger.get()))
 
-textSizeChanger.grid(row=0, column=0, padx=10, pady=10)
+textSizeFrame = tk.Frame(textInfoFrame)
+textSizeFrame.columnconfigure(0, weight=1)
+textSizeLabel = tk.Message(master=textSizeFrame, anchor=CENTER, justify=CENTER, font=mainfont, text='Text \nSize:')
+textSizeLabel.grid(row=0, column=0, sticky='E')
+fontsizevar = tk.IntVar(value=15)
+textSizeChanger = tk.ttk.Spinbox(textSizeFrame, from_=1, to=50, textvariable=fontsizevar,
+                                 command=lambda: setFontSize(textSizeChanger.get()))
+textSizeFrame.grid(row=0, column=0, padx=10, pady=10)
+textSizeChanger.grid(row=0, column=1, sticky='W')
+textSizeFrame.columnconfigure((0,1), weight=1)
+
+
 textNameLabel = tk.Message(master=textInfoFrame, anchor=CENTER, justify=CENTER, font=mainfont, width=950)
 textNameLabel.grid(row=0, column=1, sticky='NSEW', padx=10, pady=10)
-textIndexLabel = tk.Message(master=textInfoFrame, anchor=CENTER, justify=CENTER, font=mainfont, width=950)
-textIndexLabel.grid(row=0, column=2, sticky='NSEW', padx=10, pady=10)
-tk.Grid.columnconfigure(textInfoFrame, (0, 2), weight=1, uniform=1)
+textIndexFrame = tk.Frame(textInfoFrame)
+textIndexLabel = tk.Message(master=textIndexFrame, anchor=CENTER, justify=CENTER, font=mainfont, width=950)
+textIndexLabel.grid(row=0, column=0, sticky='NSEW')
+textOutputLabel = tk.Message(master=textIndexFrame, anchor=CENTER, justify=CENTER, font=mainfont, width=950, text='Output Cards: 0')
+textOutputLabel.grid(row=1, column=0, sticky='NSEW')
 
+textIndexFrame.grid(row=0, column=2, sticky='NSEW', padx=10, pady=10)
+
+tk.Grid.columnconfigure(textInfoFrame, (0, 2), weight=1, uniform=1)
+tk.Grid.columnconfigure(textInfoFrame, 1, weight=2)
 
 translationFrame = tk.ttk.Labelframe(textFrame, text='Translation')
 translationFrame.grid(row=1, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(translationFrame, 0, weight=1)
-print(window.winfo_width())
-translationLabel = tk.Label(master=translationFrame, anchor=CENTER, justify=CENTER, font=mainfont, height=4, wraplength=930)
+translationLabel = tk.Label(master=translationFrame, anchor=CENTER, justify=CENTER, font=mainfont, height=4,
+                            wraplength=930)
 translationLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 originalFrame = tk.ttk.Labelframe(textFrame, text='Original')
@@ -338,7 +365,7 @@ tk.Grid.rowconfigure(controlFrame, 0, weight=1)
 # tk.Grid.columnconfigure(controlFrame, 2, weight=1)
 # tk.Grid.columnconfigure(controlFrame, 3, weight=1)
 # tk.Grid.columnconfigure(controlFrame, 4, weight=1)
-controlFrame.columnconfigure([0,1,2,3,4], weight=1, uniform=1)
+controlFrame.columnconfigure([0, 1, 2, 3, 4], weight=1, uniform=1)
 
 controlFrame.grid(row=4, column=0, sticky='NSEW', padx=10, pady=10)
 
@@ -358,10 +385,13 @@ Menu = tk.Menu(textFrame)
 Menu.add_command(label='Edit Config', command=editConfig)
 window.config(menu=Menu)
 
+window.bind('<Configure>', resizeLabels)
+
 atlas1 = {'atlas': initializeAtlas()}
 
-
 window.title("Atlas")
+
+
 def showNewTemplate(atlas):
     for i in range(2):
         try:
@@ -379,9 +409,10 @@ def showNewTemplate(atlas):
     translationLabel.configure(text="")
     sepTransLabel.configure(text="")
 
-    while not atlas.currentTrans.ready:
-        print("snoozin")
-        originalLabel.configure(text="Translating...")
+    for i in range(10):
+        if atlas.currentTrans.ready:
+            break
+        originalLabel.configure(text="Translating%s" % ('.' * i))
         window.update_idletasks()
         time.sleep(1)
 
@@ -390,7 +421,7 @@ def showNewTemplate(atlas):
 
     print("Showing: %s" % atlas.index)
     translationLabel.configure(text=atlas.currentTrans.translation)
-    indexpercent = (atlas.index/len(atlas.sentences)*100)
+    indexpercent = (atlas.index / len(atlas.sentences) * 100)
     textIndexLabel.configure(text='Index: %s | %.2f%%' % (atlas.index, indexpercent))
     window.update_idletasks()
 
@@ -403,12 +434,14 @@ def showOriginal(atlas):
 
 
 def appendToAnki(atlas):
-    with open("Output/Saved Cards - Last Session.txt", 'a', encoding='utf-8') as lastsession, open("Output/Saved Cards - Total.txt", 'a', encoding='utf-8') as total:
+    with open("Output/Saved Cards - Last Session.txt", 'a', encoding='utf-8') as lastsession, open(
+            "Output/Saved Cards - Total.txt", 'a', encoding='utf-8') as total:
         newCard = "\"%s\";\"%s\"\n" % (atlas.currentTrans.translation, atlas.currentTrans.original)
         atlas.newCards += 1
         lastsession.write(newCard)
         total.write(newCard)
     print("Added to deck, %d new cards" % atlas.newCards)
+    textOutputLabel.configure(text='Output Cards: %s' % atlas.newCards)
 
 
 def updateIndex(atlas):
@@ -445,5 +478,3 @@ def playAudio(atlas):
 
 
 window.mainloop()
-
-
