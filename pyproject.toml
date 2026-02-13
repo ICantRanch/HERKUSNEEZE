@@ -1,0 +1,24 @@
+[project]
+name = "atlas6"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "ICantRanch",email = "hubertkula18@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11, <3.12"
+dependencies = [
+    "deepl (>=1.28.0,<2.0.0)",
+    "langdetect (>=1.0.9,<2.0.0)",
+    "gtts (>=2.5.4,<3.0.0)",
+    "playsound3 (>=3.3.1,<4.0.0)",
+    "deep_translator (>=1.11.4,<2.0.0)",
+    "spacy (>=3.8.11,<4.0.0)",
+]
+
+[tool.poetry]
+packages = [{include = "atlas6", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,532 @@
+{
+    "afrikaans": {
+        "google": "af",
+        "deepl": "AF"
+    },
+    "albanian": {
+        "google": "sq",
+        "deepl": "SQ"
+    },
+    "amharic": {
+        "google": "am"
+    },
+    "arabic": {
+        "google": "ar",
+        "deepl": "AR"
+    },
+    "armenian": {
+        "google": "hy",
+        "deepl": "HY"
+    },
+    "assamese": {
+        "google": "as",
+        "deepl": "AS"
+    },
+    "aymara": {
+        "google": "ay",
+        "deepl": "AY"
+    },
+    "azerbaijani": {
+        "google": "az",
+        "deepl": "AZ"
+    },
+    "bambara": {
+        "google": "bm"
+    },
+    "basque": {
+        "google": "eu",
+        "deepl": "EU"
+    },
+    "belarusian": {
+        "google": "be",
+        "deepl": "BE"
+    },
+    "bengali": {
+        "google": "bn",
+        "deepl": "BN"
+    },
+    "bhojpuri": {
+        "google": "bho",
+        "deepl": "BHO"
+    },
+    "bosnian": {
+        "google": "bs",
+        "deepl": "BS"
+    },
+    "bulgarian": {
+        "google": "bg",
+        "deepl": "BG"
+    },
+    "catalan": {
+        "google": "ca",
+        "deepl": "CA",
+        "model": "catalan"
+    },
+	"cantonese": {
+        "google": "yue",
+        "deepl": "YUE",
+        "model": "chinese"
+    },
+    "cebuano": {
+        "google": "ceb",
+        "deepl": "CEB"
+    },
+    "chichewa": {
+        "google": "ny"
+    },
+    "chinese (simplified)": {
+        "google": "zh-CN",
+        "deepl": "ZH",
+        "model": "chinese"
+    },
+    "chinese (traditional)": {
+        "google": "zh-TW",
+        "deepl": "ZH",
+        "model": "chinese"
+    },
+    "corsican": {
+        "google": "co"
+    },
+    "croatian": {
+        "google": "hr",
+        "deepl": "HR",
+        "model": "croatian"
+    },
+    "czech": {
+        "google": "cs",
+        "deepl": "CS"
+    },
+    "danish": {
+        "google": "da",
+        "deepl": "DA",
+        "model": "danish"
+    },
+    "dhivehi": {
+        "google": "dv"
+    },
+    "dogri": {
+        "google": "doi"
+    },
+    "dutch": {
+        "google": "nl",
+        "deepl": "NL",
+        "model": "dutch"
+    },
+    "english": {
+        "google": "en",
+        "deepl": "EN-US",
+        "model": "english"
+    },
+    "esperanto": {
+        "google": "eo",
+        "deepl": "EO"
+    },
+    "estonian": {
+        "google": "et",
+        "deepl": "ET"
+    },
+    "ewe": {
+        "google": "ee"
+    },
+    "filipino": {
+        "google": "tl"
+    },
+    "finnish": {
+        "google": "fi",
+        "deepl": "FI",
+        "model": "finnish"
+    },
+    "french": {
+        "google": "fr",
+        "deepl": "FR",
+        "model": "french"
+    },
+    "frisian": {
+        "google": "fy"
+    },
+    "galician": {
+        "google": "gl",
+        "deepl": "GL"
+    },
+    "georgian": {
+        "google": "ka",
+        "deepl": "KA"
+    },
+    "german": {
+        "google": "de",
+        "deepl": "DE",
+        "model": "german"
+    },
+    "greek": {
+        "google": "el",
+        "deepl": "EL",
+        "model": "greek"
+    },
+    "guarani": {
+        "google": "gn",
+        "deepl": "GN"
+    },
+    "gujarati": {
+        "google": "gu",
+        "deepl": "GU"
+    },
+    "haitian creole": {
+        "google": "ht",
+        "deepl": "HT"
+    },
+    "hausa": {
+        "google": "ha",
+        "deepl": "HA"
+    },
+    "hawaiian": {
+        "google": "haw"
+    },
+    "hebrew": {
+        "google": "iw",
+        "deepl": "HE"
+    },
+    "hindi": {
+        "google": "hi",
+        "deepl": "HI"
+    },
+    "hmong": {
+        "google": "hmn"
+    },
+    "hungarian": {
+        "google": "hu",
+        "deepl": "HU"
+    },
+    "icelandic": {
+        "google": "is",
+        "deepl": "IS"
+    },
+    "igbo": {
+        "google": "ig",
+        "deepl": "IG"
+    },
+    "ilocano": {
+        "google": "ilo"
+    },
+    "indonesian": {
+        "google": "id",
+        "deepl": "ID"
+    },
+    "irish": {
+        "google": "ga",
+        "deepl": "GA"
+    },
+    "italian": {
+        "google": "it",
+        "deepl": "IT",
+        "model": "italian"
+    },
+    "japanese": {
+        "google": "ja",
+        "deepl": "JA",
+        "model": "japanese"
+    },
+    "javanese": {
+        "google": "jw",
+        "deepl": "JV"
+    },
+    "kannada": {
+        "google": "kn"
+    },
+    "kazakh": {
+        "google": "kk",
+        "deepl": "KK"
+    },
+    "khmer": {
+        "google": "km"
+    },
+    "kinyarwanda": {
+        "google": "rw"
+    },
+    "konkani": {
+        "google": "gom",
+        "deepl": "GOM"
+    },
+    "korean": {
+        "google": "ko",
+        "deepl": "KO",
+        "model": "korean"
+    },
+    "krio": {
+        "google": "kri"
+    },
+    "kurdish (kurmanji)": {
+        "google": "ku",
+        "deepl": "KMR"
+    },
+    "kurdish (sorani)": {
+        "google": "ckb",
+        "deepl": "CKB"
+    },
+    "kyrgyz": {
+        "google": "ky",
+        "deepl": "KY"
+    },
+    "lao": {
+        "google": "lo"
+    },
+    "latin": {
+        "google": "la",
+        "deepl": "LA"
+    },
+    "latvian": {
+        "google": "lv",
+        "deepl": "LV"
+    },
+    "lingala": {
+        "google": "ln",
+        "deepl": "LN"
+    },
+    "lithuanian": {
+        "google": "lt",
+        "deepl": "LT",
+        "model": "lithuanian"
+    },
+    "luganda": {
+        "google": "lg"
+    },
+    "luxembourgish": {
+        "google": "lb",
+        "deepl": "LB"
+    },
+    "macedonian": {
+        "google": "mk",
+        "deepl": "MK",
+        "model": "macedonian"
+    },
+    "maithili": {
+        "google": "mai",
+        "deepl": "MAI"
+    },
+    "malagasy": {
+        "google": "mg",
+        "deepl": "MG"
+    },
+    "malay": {
+        "google": "ms",
+        "deepl": "MS"
+    },
+    "malayalam": {
+        "google": "ml",
+        "deepl": "ML"
+    },
+    "maltese": {
+        "google": "mt",
+        "deepl": "MT"
+    },
+    "maori": {
+        "google": "mi",
+        "deepl": "MI"
+    },
+    "marathi": {
+        "google": "mr",
+        "deepl": "MR"
+    },
+    "meiteilon (manipuri)": {
+        "google": "mni-Mtei"
+    },
+    "mizo": {
+        "google": "lus"
+    },
+    "mongolian": {
+        "google": "mn",
+        "deepl": "MN"
+    },
+    "myanmar": {
+        "google": "my",
+        "deepl": "MY"
+    },
+    "nepali": {
+        "google": "ne",
+        "deepl": "NE"
+    },
+    "norwegian": {
+        "google": "no",
+        "deepl": "NB",
+        "model": "norwegian"
+    },
+    "odia (oriya)": {
+        "google": "or"
+    },
+    "oromo": {
+        "google": "om",
+        "deepl": "OM"
+    },
+    "pashto": {
+        "google": "ps",
+        "deepl": "PS"
+    },
+    "persian": {
+        "google": "fa",
+        "deepl": "FA"
+    },
+    "polish": {
+        "google": "pl",
+        "deepl": "PL",
+        "model": "polish"
+    },
+    "portuguese": {
+        "google": "pt",
+        "deepl": "PT",
+        "model": "portuguese"
+    },
+    "punjabi": {
+        "google": "pa",
+        "deepl": "PA"
+    },
+    "quechua": {
+        "google": "qu",
+        "deepl": "QU"
+    },
+    "romanian": {
+        "google": "ro",
+        "deepl": "RO",
+        "model": "romanian"
+    },
+    "russian": {
+        "google": "ru",
+        "deepl": "RU",
+        "model": "russian"
+    },
+    "samoan": {
+        "google": "sm"
+    },
+    "sanskrit": {
+        "google": "sa",
+        "deepl": "SA"
+    },
+    "scots gaelic": {
+        "google": "gd"
+    },
+    "sepedi": {
+        "google": "nso"
+    },
+    "serbian": {
+        "google": "sr",
+        "deepl": "SR"
+    },
+    "sesotho": {
+        "google": "st",
+        "deepl": "ST"
+    },
+    "shona": {
+        "google": "sn"
+    },
+    "sindhi": {
+        "google": "sd"
+    },
+    "sinhala": {
+        "google": "si"
+    },
+    "slovak": {
+        "google": "sk",
+        "deepl": "SK"
+    },
+    "slovenian": {
+        "google": "sl",
+        "deepl": "SL",
+        "model": "slovenian"
+    },
+    "somali": {
+        "google": "so"
+    },
+    "spanish": {
+        "google": "es",
+        "deepl": "ES",
+        "model": "spanish"
+    },
+    "sundanese": {
+        "google": "su",
+        "deepl": "SU"
+    },
+    "swahili": {
+        "google": "sw",
+        "deepl": "SW"
+    },
+    "swedish": {
+        "google": "sv",
+        "deepl": "SV",
+        "model": "swedish"
+    },
+    "tajik": {
+        "google": "tg",
+        "deepl": "TG"
+    },
+    "tamil": {
+        "google": "ta",
+        "deepl": "TA"
+    },
+    "tatar": {
+        "google": "tt",
+        "deepl": "TT"
+    },
+    "telugu": {
+        "google": "te",
+        "deepl": "TE"
+    },
+    "thai": {
+        "google": "th",
+        "deepl": "TH"
+    },
+    "tigrinya": {
+        "google": "ti"
+    },
+    "tsonga": {
+        "google": "ts",
+        "deepl": "TS"
+    },
+    "turkish": {
+        "google": "tr",
+        "deepl": "TR"
+    },
+    "turkmen": {
+        "google": "tk",
+        "deepl": "TK"
+    },
+    "twi": {
+        "google": "ak"
+    },
+    "ukrainian": {
+        "google": "uk",
+        "deepl": "UK",
+        "model": "ukrainian"
+    },
+    "urdu": {
+        "google": "ur",
+        "deepl": "UR"
+    },
+    "uyghur": {
+        "google": "ug"
+    },
+    "uzbek": {
+        "google": "uz",
+        "deepl": "UZ"
+    },
+    "vietnamese": {
+        "google": "vi",
+        "deepl": "VI"
+    },
+    "welsh": {
+        "google": "cy",
+        "deepl": "CY"
+    },
+    "xhosa": {
+        "google": "xh",
+        "deepl": "XH"
+    },
+    "yiddish": {
+        "google": "yi",
+        "deepl": "YI"
+    },
+    "yoruba": {
+        "google": "yo"
+    },
+    "zulu": {
+        "google": "zu",
+        "deepl": "ZU"
+    }
+}

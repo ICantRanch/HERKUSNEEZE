@@ -1,2 +1,5 @@
-/dist/
-/build/
+/src/atlas6/Converted Texts/
+/src/atlas6/Output/
+/output/
+/src/atlas6/atlasConfig.ini
+/src/atlas6/atlasTextData.json
