@@ -377,7 +377,7 @@ advanceButton = tk.ttk.Button(controlFrame, text="Advance [space]", command=lamb
 advanceButton.grid(row=0, column=2, sticky='NSEW', padx=10, pady=10)
 ankiButton = tk.ttk.Button(controlFrame, text="Save to Output [4]", command=lambda: handle_keypress('4'))
 ankiButton.grid(row=0, column=3, sticky='NSEW', padx=10, pady=10)
-gotoButton = tk.ttk.Button(controlFrame, text="Go to index", command=lambda: handle_keypress('5'))
+gotoButton = tk.ttk.Button(controlFrame, text="Go to index [5]", command=lambda: handle_keypress('5'))
 gotoButton.grid(row=0, column=4, sticky='NSEW', padx=10, pady=10)
 
 Menu = tk.Menu(textFrame)
