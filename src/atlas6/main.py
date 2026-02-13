@@ -108,7 +108,7 @@ def editConfig():
 
     popup = tk.Toplevel(window)
     popup.title('Atlas Config')
-    popup.geometry('500x550+%s+%s' % (round(window.winfo_x() + (window.winfo_width() / 4)), window.winfo_y() + 10))
+    popup.geometry('500x570+%s+%s' % (round(window.winfo_x() + (window.winfo_width() / 4)), window.winfo_y() + 10))
     popup.transient(window)
 
     config = configparser.ConfigParser()
@@ -140,7 +140,7 @@ def editConfig():
     tk.Grid.rowconfigure(deeplFrame, 0, weight=1)
 
     deepllabel = tk.Message(master=deeplFrame, anchor=CENTER, justify=CENTER, width=300,
-                            text='DeepL can offer better translations but an API key is required. A free API is available but requires a DeepL account and credit card information.\n If no valid api key is available, Google Translate will be used instead.')
+                            text='DeepL can offer better translations but an API key is required. A free API is available but requires a DeepL account and credit card information.\n If no valid api key is available, Google Translate will be used instead.\nPlease enter a valid DeepL API key.')
     deepllabel.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
     deeplApiEntry = tk.ttk.Entry(deeplFrame)
     deeplApiEntry.insert(0, config['Atlas']['deeplapikey'])
@@ -152,7 +152,7 @@ def editConfig():
     tk.Grid.rowconfigure(textSelectionFrame, 0, weight=1)
 
     addTextLabel = tk.Message(textSelectionFrame, anchor=CENTER, justify=CENTER, width=300,
-                              text='A Standard .txt file can be converted for use with this app. Any number of texts can be stored and switched between. The index for each text is unique, you can switch freely between texts without losing your spot.')
+                              text='A Standard .txt file can be converted for use with this app. Any number of texts can be stored and switched between. The index for each text is unique, you can switch freely between texts without losing your spot. Several sample texts are available in the Atlas folder')
     addTextLabel.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
     addTextButton = tk.ttk.Button(textSelectionFrame, text="Add New Text", command=addTextHelper)
     addTextButton.grid(row=2, column=0, sticky='EW', padx=10, pady=10)
@@ -275,6 +275,12 @@ def initializeAtlas():
             textData = json.load(file)
         currentText = (config['Atlas']['currentText'], textData[config['Atlas']['currentText']])
 
+        configfontsize = config.getint('Atlas', 'textsize')
+        fontsizevar.set(configfontsize)
+        setFontSize(configfontsize)
+
+        window.geometry('%sx%s' % (config['Atlas']['winwidth'], config['Atlas']['winheight']))
+
         newAtlas.text = currentText[0]
         newAtlas.index = max(currentText[1]['index'] - 1, -1)
 
@@ -293,9 +299,7 @@ def initializeAtlas():
 
         window.bind("<Key>", handle_keypress)
 
-        configfontsize = config.getint('Atlas','textsize')
-        fontsizevar.set(configfontsize)
-        setFontSize(configfontsize)
+
 
         translationLabel.configure(text="Welcome to Atlas")
         originalLabel.configure(text="Advance to continue")
@@ -304,7 +308,7 @@ def initializeAtlas():
         indexpercent = ((max(newAtlas.index,0)) / max((len(newAtlas.sentences)-1),1) * 100)
         textIndexLabel.configure(text='Index: %s | %.2f%%' % (max(newAtlas.index,0), indexpercent))
 
-        window.geometry('%sx%s' % (config['Atlas']['winwidth'], config['Atlas']['winheight']))
+
 
         return newAtlas
     except Exception as e:
@@ -315,7 +319,7 @@ def initializeAtlas():
 
 window = tk.Tk()
 
-mainfont = tkFont.Font(family='Arial', size=25)
+mainfont = tkFont.Font(family='Arial', size=15)
 
 tk.Grid.columnconfigure(window, 0, weight=1)
 tk.Grid.rowconfigure(window, 0, weight=1)
