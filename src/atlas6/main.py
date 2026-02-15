@@ -9,7 +9,6 @@ from tkinter import ttk
 import tkinter.font as tkFont
 import tkinter.filedialog as tkFileDialog
 import os
-import configparser
 import uuid
 
 from Atlas import atlasInfo
@@ -37,9 +36,6 @@ def addNewText():
         googles = json.load(file)
 
     result = [None]
-    # t1 = threading.Thread(target=parse_text_to_sentence, args=(originalText, googles[detectedLang], result))
-    # t1.start()
-    # t1.join()
     parse_text_to_sentence(originalText, googles[detectedLang], result)
     sentences = result[0]
     sampleSentence = sentences[round(len(sentences)/10)]
@@ -67,38 +63,38 @@ def addNewText():
 
 
 def newConfig():
-    config = configparser.ConfigParser()
-    config.read('default.ini')
-    with open('atlasConfig.ini', 'w') as configfile:
-        config.write(configfile)
+    with open("defaultconfig.json", "r", encoding='utf-8') as file:
+        config = json.load(file)
+    with open('atlasConfig.json', 'w', encoding='utf-8') as file:
+        json.dump(config, file, indent=4)
 
 
 def editConfig():
     def saveConfig():
 
         if languageSelector.get() in availableLanguages:
-            config['Atlas']['nativeLang'] = languageSelector.get().lower()
+            config['nativelang'] = languageSelector.get().lower()
 
         if deeplApiEntry.get() != '':
             validation = validateTranslator(deeplApiEntry.get())
-            if validation and deeplApiEntry.get() != config['Atlas']['deeplapikey']:
+            if validation and deeplApiEntry.get() != config['deeplapikey']:
                 tk.messagebox.showinfo("DeepL Validation",
                                        "The inputted DeepL api key is valid, DeepL translation has been enabled")
-                config['Atlas']['deeplapikey'] = deeplApiEntry.get()
+                config['deeplapikey'] = deeplApiEntry.get()
             elif not validation:
                 tk.messagebox.showwarning("DeepL Validation", "The inputted DeepL api key is invalid")
-                config['Atlas']['deeplapikey'] = ''
+                config['deeplapikey'] = ''
 
-            config['Atlas']['deepl'] = str(validation)
+            config['deepl'] = str(validation)
 
         with open("atlasTextData.json", "r", encoding='utf-8') as file:
             availableTexts = list(json.load(file).keys())
 
         if textSelector.get() in availableTexts:
-            config['Atlas']['currentText'] = textSelector.get()
+            config['currenttext'] = textSelector.get()
 
-        with open('atlasConfig.ini', 'w') as configfile:
-            config.write(configfile)
+        with open("atlasConfig.json", "w", encoding='utf-8') as file:
+            json.dump(config, file, indent=4)
         popup.destroy()
         atlas1['atlas'] = initializeAtlas()
 
@@ -117,8 +113,8 @@ def editConfig():
     popup.geometry('500x610+%s+%s' % (round(window.winfo_x() + (window.winfo_width() / 4)), window.winfo_y() + 10))
     popup.transient(window)
 
-    config = configparser.ConfigParser()
-    config.read('atlasConfig.ini')
+    with open("atlasConfig.json", "r", encoding='utf-8') as file:
+        config = json.load(file)
 
     with open("Language Tables/combinedTable.json", "r", encoding='utf-8') as file:
         combinedTable = json.load(file)
@@ -133,7 +129,7 @@ def editConfig():
     tk.Grid.columnconfigure(languageFrame, 0, weight=1)
     languageSelector = tk.ttk.Combobox(languageFrame, values=availableLanguages)
 
-    currentLang = config['Atlas']['nativeLang'].capitalize()
+    currentLang = config['nativelang'].capitalize()
     if currentLang in availableLanguages:
         languageSelector.set(currentLang)
 
@@ -149,7 +145,7 @@ def editConfig():
                             text='DeepL can offer better translations but an API key is required. A free API is available but requires a DeepL account and credit card information.\n If no valid api key is available, Google Translate will be used instead.\nPlease enter a valid DeepL API key.')
     deepllabel.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
     deeplApiEntry = tk.ttk.Entry(deeplFrame)
-    deeplApiEntry.insert(0, config['Atlas']['deeplapikey'])
+    deeplApiEntry.insert(0, config['deeplapikey'])
     deeplApiEntry.grid(row=1, column=0, sticky='NSEW', padx=10, pady=10)
 
     textSelectionFrame = tk.ttk.Labelframe(popup, text='Text Selection')
@@ -175,8 +171,8 @@ def editConfig():
     textSelector = tk.ttk.Combobox(textSelectionFrame, values=availableTexts)
     if len(availableTexts) == 0:
         textSelector.set("No Texts Available. Add new texts to select.")
-    elif config['Atlas']['currentText'] in availableTexts:
-        textSelector.set(config['Atlas']['currentText'])
+    elif config['currenttext'] in availableTexts:
+        textSelector.set(config['currenttext'])
     else:
         textSelector.set('Please select a text.')
     textSelector.grid(row=1, column=0, sticky='EW', padx=10, pady=10)
@@ -199,9 +195,8 @@ def loadConfig():
     for i in range(2):
         try:
             # If config doesn't exist create new config
-            open('atlasConfig.ini', 'r', encoding='utf-8')
-            config = configparser.ConfigParser()
-            config.read('atlasConfig.ini')
+            with open("atlasConfig.json", "r", encoding='utf-8') as file:
+                config = json.load(file)
             return config
         except:
             newConfig()
@@ -224,11 +219,11 @@ def gotoIndex(atlas):
 
 def setFontSize(newsize):
     mainfont.config(size=newsize)
-    config = configparser.ConfigParser()
-    config.read('atlasConfig.ini')
-    config['Atlas']['textsize'] = str(newsize)
-    with open('atlasConfig.ini', 'w') as configfile:
-        config.write(configfile)
+    with open("atlasConfig.json", "r", encoding='utf-8') as file:
+        config = json.load(file)
+    config['textsize'] = str(newsize)
+    with open('atlasConfig.json', 'w', encoding='utf-8') as file:
+        json.dump(config, file, indent=4)
 
 
 def resizeLabels(event):
@@ -237,12 +232,12 @@ def resizeLabels(event):
         for label in labels:
             label.configure(wraplength=round(event.width * 0.9))
 
-        config = configparser.ConfigParser()
-        config.read('atlasConfig.ini')
-        config['Atlas']['winwidth'] = str(event.width)
-        config['Atlas']['winheight'] = str(event.height)
-        with open('atlasConfig.ini', 'w') as configfile:
-            config.write(configfile)
+        with open("atlasConfig.json", "r", encoding='utf-8') as file:
+            config = json.load(file)
+        config['winwidth'] = str(event.width)
+        config['winheight'] = str(event.height)
+        with open('atlasConfig.json', 'w', encoding='utf-8') as file:
+            json.dump(config, file, indent=4)
 
 def handle_keypress(input):
     atlas2 = atlas1['atlas']
@@ -281,13 +276,13 @@ def initializeAtlas():
         # Load Text Data
         with open("atlasTextData.json", "r", encoding='utf-8') as file:
             textData = json.load(file)
-        currentText = (config['Atlas']['currentText'], textData[config['Atlas']['currentText']])
+        currentText = (config['currenttext'], textData[config['currenttext']])
 
-        configfontsize = config.getint('Atlas', 'textsize')
+        configfontsize = config['textsize']
         fontsizevar.set(configfontsize)
         setFontSize(configfontsize)
 
-        window.geometry('%sx%s' % (config['Atlas']['winwidth'], config['Atlas']['winheight']))
+        window.geometry('%sx%s' % (config['winwidth'], config['winheight']))
 
         newAtlas.text = currentText[0]
         newAtlas.index = max(currentText[1]['index'] - 1, -1)
@@ -297,11 +292,11 @@ def initializeAtlas():
             combinedTable = json.load(file)
 
         newAtlas.initializeTranslator(combinedTable[currentText[1]['lang']],
-                                      combinedTable[config['Atlas']['nativelang']], config['Atlas'].getboolean('deepl'),
-                                      config['Atlas']['deeplapikey'])
+                                      combinedTable[config['nativelang']], config['deepl'],
+                                      config['deeplapikey'])
 
 
-        with open('Converted Texts/%s.json' % config['Atlas']['currentText'], 'r', encoding='utf-8') as file:
+        with open('Converted Texts/%s.json' % config['currenttext'], 'r', encoding='utf-8') as file:
             newAtlas.sentences = json.load(file)
 
 
@@ -370,20 +365,20 @@ tk.Grid.columnconfigure(textInfoFrame, 1, weight=2)
 translationFrame = tk.ttk.Labelframe(textFrame, text='Translation')
 translationFrame.grid(row=1, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(translationFrame, 0, weight=1)
-translationLabel = tk.Label(master=translationFrame, anchor=CENTER, justify=CENTER, font=mainfont, height=4,
+translationLabel = tk.Label(master=translationFrame, anchor=CENTER, justify=CENTER, font=mainfont,
                             wraplength=930)
 translationLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 originalFrame = tk.ttk.Labelframe(textFrame, text='Original')
 originalFrame.grid(row=2, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(originalFrame, 0, weight=1)
-originalLabel = tk.Label(master=originalFrame, anchor=CENTER, justify=CENTER, font=mainfont, height=4, wraplength=930)
+originalLabel = tk.Label(master=originalFrame, anchor=CENTER, justify=CENTER, font=mainfont, wraplength=930)
 originalLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 sepTransFrame = tk.ttk.Labelframe(textFrame, text='Individual Translations')
 sepTransFrame.grid(row=3, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(sepTransFrame, 0, weight=1)
-sepTransLabel = tk.Label(master=sepTransFrame, anchor=CENTER, justify=CENTER, font=mainfont, height=4, wraplength=930)
+sepTransLabel = tk.Label(master=sepTransFrame, anchor=CENTER, justify=CENTER, font=mainfont, wraplength=930)
 sepTransLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
 
 controlFrame = tk.Frame(textFrame)
