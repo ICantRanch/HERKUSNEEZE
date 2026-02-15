@@ -3,3 +3,5 @@
 /output/
 /src/atlas6/atlasConfig.ini
 /src/atlas6/atlasTextData.json
+/dist/
+/build/

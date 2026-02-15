@@ -33,12 +33,16 @@ def addNewText():
 
     detectedLang = detect(sampleText)
 
-    with open("language Tables/googleTable.json", "r") as file:
+    with open("language Tables/googleTable.json", "r", encoding='utf-8') as file:
         googles = json.load(file)
 
-    sentences = parse_text_to_sentence(originalText, googles[detectedLang])
+    result = [None]
+    # t1 = threading.Thread(target=parse_text_to_sentence, args=(originalText, googles[detectedLang], result))
+    # t1.start()
+    # t1.join()
+    parse_text_to_sentence(originalText, googles[detectedLang], result)
+    sentences = result[0]
     sampleSentence = sentences[round(len(sentences)/10)]
-
 
     result = tk.messagebox.askquestion(title="Confirmation",
                                        message="Does the following sentence look correct?\n\n%s\n\nDetected Language: %s" % (
@@ -48,10 +52,10 @@ def addNewText():
 
     textInfo = {fileName: {"ID": uuid.uuid1().hex, "index": 0, "lang": googles[detectedLang]}}
 
-    with open("Converted Texts/%s.json" % fileName, "w") as file:
+    with open("Converted Texts/%s.json" % fileName, "w", encoding='utf-8') as file:
         json.dump(sentences, file, indent=4)
 
-    with open("atlasTextData.json", "a+") as file:
+    with open("atlasTextData.json", "a+", encoding='utf-8') as file:
         file.seek(0)
         try:
             jsonData = json.load(file)
@@ -87,7 +91,7 @@ def editConfig():
 
             config['Atlas']['deepl'] = str(validation)
 
-        with open("atlasTextData.json", "r") as file:
+        with open("atlasTextData.json", "r", encoding='utf-8') as file:
             availableTexts = list(json.load(file).keys())
 
         if textSelector.get() in availableTexts:
@@ -99,22 +103,24 @@ def editConfig():
         atlas1['atlas'] = initializeAtlas()
 
     def addTextHelper():
+        addTextProgressLabel.configure(text='Converting text...')
         addNewText()
-        with open("atlasTextData.json", "r") as file:
+        with open("atlasTextData.json", "r", encoding='utf-8') as file:
             availableTexts = list(json.load(file).keys())
         textSelector['values'] = availableTexts
         if textSelector.get() not in availableTexts and len(availableTexts) > 0:
             textSelector.set('Please select a text.')
+        addTextProgressLabel.configure(text='')
 
     popup = tk.Toplevel(window)
     popup.title('Atlas Config')
-    popup.geometry('500x570+%s+%s' % (round(window.winfo_x() + (window.winfo_width() / 4)), window.winfo_y() + 10))
+    popup.geometry('500x610+%s+%s' % (round(window.winfo_x() + (window.winfo_width() / 4)), window.winfo_y() + 10))
     popup.transient(window)
 
     config = configparser.ConfigParser()
     config.read('atlasConfig.ini')
 
-    with open("Language Tables/combinedTable.json", "r") as file:
+    with open("Language Tables/combinedTable.json", "r", encoding='utf-8') as file:
         combinedTable = json.load(file)
 
     availableLanguages = [language.capitalize() for language in list(combinedTable.keys())]
@@ -156,8 +162,10 @@ def editConfig():
     addTextLabel.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
     addTextButton = tk.ttk.Button(textSelectionFrame, text="Add New Text", command=addTextHelper)
     addTextButton.grid(row=2, column=0, sticky='EW', padx=10, pady=10)
+    addTextProgressLabel = tk.ttk.Label(textSelectionFrame, anchor=CENTER, justify=CENTER)
+    addTextProgressLabel.grid(row=3, column=0, sticky='EW', padx=10, pady=10)
 
-    with open("atlasTextData.json", "a+") as file:
+    with open("atlasTextData.json", "a+", encoding='utf-8') as file:
         file.seek(0)
         try:
             availableTexts = list(json.load(file).keys())
@@ -191,7 +199,7 @@ def loadConfig():
     for i in range(2):
         try:
             # If config doesn't exist create new config
-            open('atlasConfig.ini', 'r')
+            open('atlasConfig.ini', 'r', encoding='utf-8')
             config = configparser.ConfigParser()
             config.read('atlasConfig.ini')
             return config
@@ -266,12 +274,12 @@ def initializeAtlas():
         # Load Config
         config = loadConfig()
 
-        with open("Output/Saved Cards - Last Session.txt", 'w') as file:
+        with open("Output/Saved Cards - Last Session.txt", 'w', encoding='utf-8') as file:
             file.close()
         newAtlas = atlasInfo()
 
         # Load Text Data
-        with open("atlasTextData.json", "r") as file:
+        with open("atlasTextData.json", "r", encoding='utf-8') as file:
             textData = json.load(file)
         currentText = (config['Atlas']['currentText'], textData[config['Atlas']['currentText']])
 
@@ -285,7 +293,7 @@ def initializeAtlas():
         newAtlas.index = max(currentText[1]['index'] - 1, -1)
 
         # Load Language Table
-        with open("Language Tables/combinedTable.json", "r") as file:
+        with open("Language Tables/combinedTable.json", "r", encoding='utf-8') as file:
             combinedTable = json.load(file)
 
         newAtlas.initializeTranslator(combinedTable[currentText[1]['lang']],
@@ -312,6 +320,7 @@ def initializeAtlas():
 
         return newAtlas
     except Exception as e:
+        print(e)
         translationLabel.configure(text="Welcome to Atlas")
         originalLabel.configure(text="No text selected")
         sepTransLabel.configure(text='Texts can be added and selected in the configuration menu')
@@ -436,7 +445,7 @@ def showNewTemplate(atlas):
         originalLabel.configure(text="A new text can be selected in the config menu")
         return
 
-    for i in range(10):
+    for i in range(20):
         if atlas.currentTrans.ready:
             break
         originalLabel.configure(text="Translating%s" % ('.' * i))
@@ -471,7 +480,7 @@ def appendToAnki(atlas):
 
 
 def updateIndex(atlas):
-    with open("atlasTextData.json", "r+") as file:
+    with open("atlasTextData.json", "r+", encoding='utf-8') as file:
         textData = json.load(file)
         textData[atlas.text]['index'] = atlas.index
         file.truncate(0)

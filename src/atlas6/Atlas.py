@@ -59,7 +59,7 @@ class atlasInfo:
             else:
                 raise Exception
         except:
-            googleTranslator = GoogleTranslator(source='auto', target=targets['google'])
+            googleTranslator = GoogleTranslator(source=sources['google'], target=targets['google'])
             self.transObj = self.translatorObj('google', googleTranslator, sources, targets)
 
     def translate(self, texts):
@@ -67,7 +67,7 @@ class atlasInfo:
             try:
                 # Don't judge this too much, this cludge is because the translation library
                 # doesn't like multiple threads using the same translator :/
-                googleTranslator = GoogleTranslator(source='auto', target=self.transObj.targetLangs['google'])
+                googleTranslator = GoogleTranslator(source=self.transObj.sourceLangs['google'], target=self.transObj.targetLangs['google'])
 
                 if isinstance(texts, list):
                     results = self.transObj.translator.translate_batch(texts)
@@ -83,7 +83,7 @@ class atlasInfo:
                 return "Error in Translation"
         elif self.transObj.transType == 'deepl':
             try:
-                results = self.transObj.translator.translate_text(text=texts, target_lang=self.transObj.targetLangs['deepl'])
+                results = self.transObj.translator.translate_text(text=texts,source_lang=self.transObj.sourceLangs['deepl'], target_lang=self.transObj.targetLangs['deepl'])
                 if isinstance(results, list):
                     return " | ".join([result.text for result in results])
                 else:
