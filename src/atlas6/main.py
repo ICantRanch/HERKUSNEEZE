@@ -38,7 +38,7 @@ def addNewText():
     result = [None]
     parse_text_to_sentence(originalText, googles[detectedLang], result)
     sentences = result[0]
-    sampleSentence = sentences[round(len(sentences)/10)]
+    sampleSentence = sentences[round(len(sentences)/10)][0:300]
 
     result = tk.messagebox.askquestion(title="Confirmation",
                                        message="Does the following sentence look correct?\n\n%s\n\nDetected Language: %s" % (
