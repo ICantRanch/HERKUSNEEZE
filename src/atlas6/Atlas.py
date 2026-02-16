@@ -36,12 +36,19 @@ class atlasInfo:
             self.translation = None
             self.separatedTranslation = None
             self.voice = None
+            self.sound = None
 
         def playVoice(self):
             try:
-                playsound(self.voice.name, block=False)
+                self.sound = playsound(self.voice.name, block=False)
             except Exception as e:
-                return
+                pass
+
+        def stopVoice(self):
+            try:
+                self.sound.stop()
+            except:
+                pass
 
     class translatorObj:
         def __init__(self, transType, translator, source_langs, target_langs):

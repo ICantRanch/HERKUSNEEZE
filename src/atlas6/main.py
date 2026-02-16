@@ -422,6 +422,12 @@ window.title("Atlas")
 
 # Clears text labels and shows the next index in the text, initiates translations
 def showNewTemplate(atlas):
+
+    try:
+        atlas.currentTrans.stopVoice()
+    except:
+        pass
+
     for i in range(2):
         try:
             atlas.fillQueue()
