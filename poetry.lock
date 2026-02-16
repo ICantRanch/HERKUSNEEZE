@@ -1328,6 +1328,56 @@ files = [
 ]
 
 [[package]]
+name = "spacy-pkuseg"
+version = "1.0.1"
+description = "Chinese word segmentation toolkit for spaCy (fork of pkuseg-python)"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "spacy_pkuseg-1.0.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:6b59ebeded131c415f41e9010b1cd94d109aee67e44c847b75cfc71fe1376080"},
+    {file = "spacy_pkuseg-1.0.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:052f3fb4b66179d04c0e432add868630ba3fede14396a3a1ca5aacf42af78fa3"},
+    {file = "spacy_pkuseg-1.0.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4f465604bf1cc13c10c944fb32d972251d0e947356fa2a73e877d42c9e6c0a04"},
+    {file = "spacy_pkuseg-1.0.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1c5cceb192841c3475e16a0f2885f897dd2cd4a62fc349404544f36740000b4d"},
+    {file = "spacy_pkuseg-1.0.1-cp310-cp310-musllinux_1_2_aarch64.whl", hash = "sha256:156c6fab54f8c6015e0b6d58ac49b8b624bc648a2500e23176116e58256dbb48"},
+    {file = "spacy_pkuseg-1.0.1-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:4fd518e8f6e64fe6e26f7ef865034d916902a493da785909a972c4f08bda785f"},
+    {file = "spacy_pkuseg-1.0.1-cp310-cp310-win_amd64.whl", hash = "sha256:2ee8422c3f9b79ee708c85e0d3d243221d68ccd99149b940164e0785d4b0c80f"},
+    {file = "spacy_pkuseg-1.0.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:cb2716c956b9dcb2826e03829c70f7ea5a5180b33fce961c995a3a0decc3ff62"},
+    {file = "spacy_pkuseg-1.0.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:7aa508ad43a7aeeef1a4c875b14bfcd4135c922b3a6b9ab251eb06f57456dacd"},
+    {file = "spacy_pkuseg-1.0.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:00cc552cecb92e3157cfee6b01c081b809728b5ff2bf88c875cc179627445837"},
+    {file = "spacy_pkuseg-1.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:530cb89ec094214539148cbb09e3f17af152627b3ec1cf800dad90907ef3a5e5"},
+    {file = "spacy_pkuseg-1.0.1-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:23e9d546540d67cda6100734d08c68bd0a3c7a523c5860ebe2a5661acb9cb23b"},
+    {file = "spacy_pkuseg-1.0.1-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:da6e5caf6fcb0c588bca9b5f1d898c4058e4c324fb8034ecc2acce598dbadfad"},
+    {file = "spacy_pkuseg-1.0.1-cp311-cp311-win_amd64.whl", hash = "sha256:13961649edbae2beb60abaaf293ad7021ea044a01c482bd3d990538aefea41db"},
+    {file = "spacy_pkuseg-1.0.1-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:709e92fc753b630581ba14421f860a22666f606bda2354813c8d2063714817f1"},
+    {file = "spacy_pkuseg-1.0.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:bacafcf24c6c1a93c6ca73e984f5febee2640b9e0fc7785b9a3316581afdcb50"},
+    {file = "spacy_pkuseg-1.0.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d258101aa9ead907e58fead6c7dffc2fae7e96c5436c8dcd08cc1e96870d37d2"},
+    {file = "spacy_pkuseg-1.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ffb982053b2af6c3f1475e77d66f053f0df253e0ed6ec9a3ed6e5df4a8a8896f"},
+    {file = "spacy_pkuseg-1.0.1-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:0855796ea1de5c6b455a4a0e2c6622cb4c3cf1666d6c95474fcef878aedbc3d5"},
+    {file = "spacy_pkuseg-1.0.1-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:3ba4a8c0cce05147ccec8294d4ae6c2f49fba31994a4fa2b12e4a692965ab231"},
+    {file = "spacy_pkuseg-1.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:1de1f4fb62f730d72b5d80daf858783b8662e489539d7724b0c7766258860f87"},
+    {file = "spacy_pkuseg-1.0.1-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:7c3dfe0d4398b8fd5d462747daea67929873ca40df69e39cd86f400fbfc2af52"},
+    {file = "spacy_pkuseg-1.0.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:b242a559343302fe2077122a699a0fa0d92d5ac66640bf88a6e306a988632f62"},
+    {file = "spacy_pkuseg-1.0.1-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b8402b879ccd482a00850133ff563d6f182b8274e0b633b2e066f2d4ae3b6824"},
+    {file = "spacy_pkuseg-1.0.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6b6329d66a96b806b88081a733329a355659239826c4f36758fea51d25974cbf"},
+    {file = "spacy_pkuseg-1.0.1-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:ae70691212406b7d160e8b635fe90e68ac97a4f8c85485230debc646754a4df5"},
+    {file = "spacy_pkuseg-1.0.1-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:fae8721e91bb6944a61d9102a4d25162e8f159e7b8a91222f39621afa4eb0bcd"},
+    {file = "spacy_pkuseg-1.0.1-cp313-cp313-win_amd64.whl", hash = "sha256:36f89cd2bd8757b003f96dc7622e1af3f21abda8dd86fb8a2513ce926e722265"},
+    {file = "spacy_pkuseg-1.0.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:11b5bef9c5a84af3feed517b31f2f51f471fc1990fe1ad856c7b5c10e69a7ed7"},
+    {file = "spacy_pkuseg-1.0.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:b5ed6907add9fab7254a09d7b759caa628e40f5be31912b4d9503463f81f7554"},
+    {file = "spacy_pkuseg-1.0.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:adfb92410aa7c4291d4f94d8364662eccf7a21259784a1136835500b01b1ed03"},
+    {file = "spacy_pkuseg-1.0.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c08559c26aba6e922204790942cac171c9f4b0792b6d8d1993d566b5fd5e5d67"},
+    {file = "spacy_pkuseg-1.0.1-cp39-cp39-musllinux_1_2_aarch64.whl", hash = "sha256:2117659b94e0d649f2e3692588b84d458a9bbad87686cc21f304fc2fd1ce9d4a"},
+    {file = "spacy_pkuseg-1.0.1-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:59effe42139ed70963770870ba1ba9ff19d0dfaf5b6b8a0b2f2ad5e19ec8057c"},
+    {file = "spacy_pkuseg-1.0.1-cp39-cp39-win_amd64.whl", hash = "sha256:70a64142d738bd9602f64cbfb401146192e5068057151cad4da95f8cb8fa3788"},
+    {file = "spacy_pkuseg-1.0.1.tar.gz", hash = "sha256:b48078775afff34914375344d56f70a37ec044188ccaece3f70806fd322a47eb"},
+]
+
+[package.dependencies]
+numpy = ">=1.19.0,<3.0.0"
+srsly = ">=2.3.0,<3.0.0"
+
+[[package]]
 name = "srsly"
 version = "2.5.2"
 description = "Modern high-performance serialization utilities for Python"
@@ -1708,4 +1758,4 @@ dev = ["pytest", "setuptools"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11, <3.12"
-content-hash = "8e3b3cc1c02fe8602c5ed8401fc114935373918f81441b972218a874769585b8"
+content-hash = "83889e2ebd7ae6c260a30866645cbe6326bed52a3fc07a2e114a3e07736f4bf0"

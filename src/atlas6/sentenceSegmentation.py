@@ -1,5 +1,6 @@
 import json
 import spacy
+import spacy_pkuseg
 
 
 def text_to_chunks(text):
@@ -30,7 +31,8 @@ def parse_text_to_sentence(text, lang, result):
     try:
         model = langTable[lang]['model']
         nlp = spacy.load('Segmentation Models/%s' % model)
-    except:
+    except Exception as e:
+        print(e)
         model = 'english'
         nlp = spacy.load('Segmentation Models/%s' % model)
 

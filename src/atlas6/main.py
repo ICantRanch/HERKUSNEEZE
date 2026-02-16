@@ -483,7 +483,6 @@ def appendToAnki(atlas):
         atlas.newCards += 1
         lastsession.write(newCard)
         total.write(newCard)
-    print("Added to deck, %d new cards" % atlas.newCards)
     textOutputLabel.configure(text='Output Cards: %s' % atlas.newCards)
 
 # Updates the index for the current text in the atlasTextData.json file
