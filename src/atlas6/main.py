@@ -14,7 +14,7 @@ import uuid
 from Atlas import atlasInfo
 from sentenceSegmentation import parse_text_to_sentence
 
-
+# Prompt the user for a .txt file, convert it for use with the app, and add it to available texts to use
 def addNewText():
     filepath = tkFileDialog.askopenfilename(title='New Text Selection', filetypes=[('Text Files', '*.txt')])
     if not os.path.exists(filepath):
@@ -61,14 +61,16 @@ def addNewText():
         file.truncate(0)
         json.dump(jsonData, file, indent=4)
 
-
+# Create a new config file from the default configs
 def newConfig():
     with open("defaultconfig.json", "r", encoding='utf-8') as file:
         config = json.load(file)
     with open('atlasConfig.json', 'w', encoding='utf-8') as file:
         json.dump(config, file, indent=4)
 
-
+# Open a GUI for editing various parts of the user config including:
+# Native language, DeepL config, and which text is currently activated
+# Includes method for the user to add new texts
 def editConfig():
     def saveConfig():
 
@@ -76,7 +78,7 @@ def editConfig():
             config['nativelang'] = languageSelector.get().lower()
 
         if deeplApiEntry.get() != '':
-            validation = validateTranslator(deeplApiEntry.get())
+            validation = isValidTranslator(deeplApiEntry.get())
             if validation and deeplApiEntry.get() != config['deeplapikey']:
                 tk.messagebox.showinfo("DeepL Validation",
                                        "The inputted DeepL api key is valid, DeepL translation has been enabled")
@@ -122,7 +124,6 @@ def editConfig():
     availableLanguages = [language.capitalize() for language in list(combinedTable.keys())]
 
     tk.Grid.columnconfigure(popup, 0, weight=1)
-    # tk.Grid.rowconfigure(popup, 1, weight=1)
 
     languageFrame = tk.ttk.Labelframe(popup, text='Please Select Your Native Language')
     tk.Grid.rowconfigure(languageFrame, 0, weight=1)
@@ -141,7 +142,7 @@ def editConfig():
     tk.Grid.columnconfigure(deeplFrame, 0, weight=1)
     tk.Grid.rowconfigure(deeplFrame, 0, weight=1)
 
-    deepllabel = tk.Message(master=deeplFrame, anchor=CENTER, justify=CENTER, width=300,
+    deepllabel = tk.Message(master=deeplFrame, anchor=CENTER, justify=CENTER, width=450,
                             text='DeepL can offer better translations but an API key is required. A free API is available but requires a DeepL account and credit card information.\n If no valid api key is available, Google Translate will be used instead.\nPlease enter a valid DeepL API key.')
     deepllabel.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
     deeplApiEntry = tk.ttk.Entry(deeplFrame)
@@ -153,8 +154,8 @@ def editConfig():
     tk.Grid.columnconfigure(textSelectionFrame, 0, weight=1)
     tk.Grid.rowconfigure(textSelectionFrame, 0, weight=1)
 
-    addTextLabel = tk.Message(textSelectionFrame, anchor=CENTER, justify=CENTER, width=300,
-                              text='A Standard .txt file can be converted for use with this app. Any number of texts can be stored and switched between. The index for each text is unique, you can switch freely between texts without losing your spot. Several sample texts are available in the Atlas folder')
+    addTextLabel = tk.Message(textSelectionFrame, anchor=CENTER, justify=CENTER, width=450,
+                              text='A Standard .txt file can be converted for use with this app. Any number of texts can be stored and switched between. The index for each text is unique, you can switch freely between texts without losing your spot. Several sample texts are available in the Atlas folder. A text may take serveral seconds to convert.')
     addTextLabel.grid(row=0, column=0, sticky='EW', padx=10, pady=10)
     addTextButton = tk.ttk.Button(textSelectionFrame, text="Add New Text", command=addTextHelper)
     addTextButton.grid(row=2, column=0, sticky='EW', padx=10, pady=10)
@@ -182,15 +183,15 @@ def editConfig():
 
     window.wait_window(popup)
 
-
-def validateTranslator(apikey):
+# Returns whether the DeepL api key is valid and ready to use
+def isValidTranslator(apikey):
     try:
         deepl.DeepLClient(apikey).get_usage()
         return True
     except:
         return False
 
-
+# Tries to load user config and creates new one if not available
 def loadConfig():
     for i in range(2):
         try:
@@ -201,7 +202,7 @@ def loadConfig():
         except:
             newConfig()
 
-
+# Prompts the user for an index and goes to that index in the text, if valid
 def gotoIndex(atlas):
     newIndex = tk.simpledialog.askinteger('Go to index', 'What index would you like to go to?')
     try:
@@ -216,7 +217,7 @@ def gotoIndex(atlas):
     atlas.state = "translation"
     showNewTemplate(atlas)
 
-
+# Sets the font size and saves to config file with the inputted number
 def setFontSize(newsize):
     mainfont.config(size=newsize)
     with open("atlasConfig.json", "r", encoding='utf-8') as file:
@@ -225,7 +226,7 @@ def setFontSize(newsize):
     with open('atlasConfig.json', 'w', encoding='utf-8') as file:
         json.dump(config, file, indent=4)
 
-
+# When the window is resized, the main text labels are resized to fit
 def resizeLabels(event):
     if event.widget == window:
         labels = [translationLabel, originalLabel, sepTransLabel]
@@ -239,6 +240,7 @@ def resizeLabels(event):
         with open('atlasConfig.json', 'w', encoding='utf-8') as file:
             json.dump(config, file, indent=4)
 
+# Handles keypresses allowing use of the app with just the keyboard
 def handle_keypress(input):
     atlas2 = atlas1['atlas']
 
@@ -252,18 +254,20 @@ def handle_keypress(input):
     if character == '3':
         advanceState(atlas2)
     elif character == '2':
-        # Replay audio
+        # Replay audio for the current translation
         playAudio(atlas2)
     elif character == '1':
+        # Revert the index by 1
         revertOne(atlas2)
     elif character == '4':
         # Add to anki file
         appendToAnki(atlas2)
     elif character == '5':
-        # Go to a user inputed index
+        # Go to a user inputted index
         gotoIndex(atlas2)
     advanceButton.focus_set()
 
+# Initialize app with info from user config file
 def initializeAtlas():
     try:
         # Load Config
@@ -365,21 +369,24 @@ tk.Grid.columnconfigure(textInfoFrame, 1, weight=2)
 translationFrame = tk.ttk.Labelframe(textFrame, text='Translation')
 translationFrame.grid(row=1, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(translationFrame, 0, weight=1)
-translationLabel = tk.Label(master=translationFrame, anchor=CENTER, justify=CENTER, font=mainfont,
+translationLabel = tk.Label(master=translationFrame, anchor=tk.CENTER, justify=tk.CENTER, font=mainfont,
                             wraplength=930)
 translationLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
+tk.Grid.rowconfigure(translationFrame, 0, weight=1)
 
 originalFrame = tk.ttk.Labelframe(textFrame, text='Original')
 originalFrame.grid(row=2, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(originalFrame, 0, weight=1)
-originalLabel = tk.Label(master=originalFrame, anchor=CENTER, justify=CENTER, font=mainfont, wraplength=930)
+originalLabel = tk.Label(master=originalFrame, anchor='center', justify='center', font=mainfont, wraplength=930)
 originalLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
+tk.Grid.rowconfigure(originalFrame, 0, weight=1)
 
 sepTransFrame = tk.ttk.Labelframe(textFrame, text='Individual Translations')
 sepTransFrame.grid(row=3, column=0, sticky='NSEW', padx=10, pady=10)
 tk.Grid.columnconfigure(sepTransFrame, 0, weight=1)
 sepTransLabel = tk.Label(master=sepTransFrame, anchor=CENTER, justify=CENTER, font=mainfont, wraplength=930)
 sepTransLabel.grid(row=0, column=0, sticky='NSEW', padx=10, pady=10)
+tk.Grid.rowconfigure(sepTransFrame, 0, weight=1)
 
 controlFrame = tk.Frame(textFrame)
 tk.Grid.rowconfigure(controlFrame, 0, weight=1)
@@ -413,7 +420,7 @@ atlas1 = {'atlas': initializeAtlas()}
 
 window.title("Atlas")
 
-
+# Clears text labels and shows the next index in the text, initiates translations
 def showNewTemplate(atlas):
     for i in range(2):
         try:
@@ -455,14 +462,14 @@ def showNewTemplate(atlas):
     textIndexLabel.configure(text='Index: %s | %.2f%%' % (atlas.index, indexpercent))
     window.update_idletasks()
 
-
+# Shows original text from selected text, as well as individual translations for each word
 def showOriginal(atlas):
     originalLabel.configure(text=atlas.currentTrans.original)
     sepTransLabel.configure(text=atlas.currentTrans.separatedTranslation)
     window.update_idletasks()
     atlas.currentTrans.playVoice()
 
-
+# Adds the original text and its translation to a file that is easily inputted into Anki, adds to backup file as well
 def appendToAnki(atlas):
     with open("Output/Saved Cards - Last Session.txt", 'a', encoding='utf-8') as lastsession, open(
             "Output/Saved Cards - Total.txt", 'a', encoding='utf-8') as total:
@@ -473,7 +480,7 @@ def appendToAnki(atlas):
     print("Added to deck, %d new cards" % atlas.newCards)
     textOutputLabel.configure(text='Output Cards: %s' % atlas.newCards)
 
-
+# Updates the index for the current text in the atlasTextData.json file
 def updateIndex(atlas):
     with open("atlasTextData.json", "r+", encoding='utf-8') as file:
         textData = json.load(file)
@@ -482,7 +489,8 @@ def updateIndex(atlas):
         file.seek(0)
         json.dump(textData, file, indent=4)
 
-
+# Advances state of the app, showing the original text if translation is shown,
+# and showing a new translation if the current index is finished
 def advanceState(atlas):
     if atlas.state == "translation":
         atlas.state = "original"
@@ -493,7 +501,7 @@ def advanceState(atlas):
         updateIndex(atlas)
         showNewTemplate(atlas)
 
-
+# Goes back 1 in the index, showing the previous translation
 def revertOne(atlas):
     atlas.index -= 1
     atlas.transQueue.appendleft(atlas.currentTrans)
@@ -502,7 +510,7 @@ def revertOne(atlas):
     atlas.state = "translation"
     showNewTemplate(atlas)
 
-
+# Plays the audio of the current translation
 def playAudio(atlas):
     atlas.currentTrans.playVoice()
 
