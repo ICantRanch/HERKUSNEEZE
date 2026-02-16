@@ -16,4 +16,7 @@ There are controls on the bottom edge of the app, displayed with their optional 
 
 By pressing the 'Save to Output' button, the current sentence and its translation will be added as a pair to a file for use outside of the app. This file is formatted for easy import into Anki. The file can be found in the Output folder inside the Atlas folder. A user can click the 'Output Cards' label to open that folder. The folder will contain 2 files. The 'Last Session' file contains any sentence pairs that were added in the last session of Atlas. The 'Output Cards' label will display the number of sentence pairs added this session. The folder also contains a 'Total' file which contains all saved sentence pairs from when the app was first used.
 
+The text .txt files can be obtained through various means. [Project Gutenberg](https://www.gutenberg.org/) is a free library of ebooks that can easily be used with this app. It is recommended to consider the age of the texts. While still readable, older texts may not accurately represent how the language is used in the modern day.
+
+
 
